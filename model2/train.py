@@ -7,10 +7,10 @@ import numpy as np
 
 
 def main():
-    batch_size = 32
+    batch_size = 1024
     learning_rate = 1e-6
-    num_epochs = 150
-    sequenceLength = 10
+    num_epochs = 500
+    sequenceLength = 15
 
     #Dataset
     processor = DataProcessor(sequenceLength)
