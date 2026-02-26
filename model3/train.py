@@ -5,11 +5,10 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 import numpy as np
 
-def quantile_loss(preds, target, quantile):
-    errors = target - preds
-    loss = torch.max((quantile - 1)) * errors, quantile * errors
+def quantile_loss(preds, targets, quantile: float):
+    errors = targets - preds
+    loss = torch.max((quantile - 1) * errors, quantile * errors)
     return torch.abs(loss).mean()
-
 
 def main():
     batch_size = 1024
@@ -133,6 +132,7 @@ def main():
     criterion_mse = nn.MSELoss()
     criterion_huber = nn.SmoothL1Loss()
 
+
     train_losses_embb = []
     train_losses_mmtc = []
     train_losses_urllc = []
@@ -167,7 +167,7 @@ def main():
             # Train mmtc model
             opt_mmtc.zero_grad()
             pred_mmtc = model_mmtc(x_mmtc)
-            loss_mmtc = criterion_mse(pred_mmtc, y_mmtc)
+            loss_mmtc = quantile_loss(pred_mmtc, y_mmtc, 0.7)
             loss_mmtc.backward()
             opt_mmtc.step()
             epochs_loss_mmtc += loss_mmtc.item()
@@ -210,7 +210,7 @@ def main():
 
                 # mmtc val
                 pred_mmtc = model_mmtc(x_mmtc)
-                val_loss_mmtc += criterion_mse(pred_mmtc, y_mmtc).item()
+                val_loss_mmtc += quantile_loss(pred_mmtc, y_mmtc, 0.7).item()
                 
                 # uRLLC Val
                 pred_urllc = model_urllc(x_urllc)
