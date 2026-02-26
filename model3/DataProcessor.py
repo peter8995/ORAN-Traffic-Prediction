@@ -43,35 +43,26 @@ class DataProcessor:
             y_windows.append(window_y)
 
         return np.array(X_windows), np.array(y_windows)
-    
-class MultiTaskDataset(Dataset):
-    def __init__(self, embb_path, mmtc_path, urllc_path, processor, scalers_embb, scalers_mmtc, scalers_urllc, mode = 'train'):
-        self.X_embb, self.y_embb = processor.process_file(embb_path, scalers_embb[0], scalers_embb[1])
-        self.X_mmtc, self.y_mmtc = processor.process_file(mmtc_path, scalers_mmtc[0], scalers_mmtc[1])
-        self.X_urllc, self.y_urllc = processor.process_file(urllc_path, scalers_urllc[0], scalers_urllc[1])
-        
-        self.min_len = min(len(self.X_embb), len(self.X_mmtc), len(self.X_urllc))
 
-        self.X_embb = self.X_embb[:self.min_len]
-        self.y_embb = self.y_embb[:self.min_len]
-        self.X_mmtc = self.X_mmtc[:self.min_len]
-        self.y_mmtc = self.y_mmtc[:self.min_len]
-        self.X_urllc = self.X_urllc[:self.min_len]
-        self.y_urllc = self.y_urllc[:self.min_len]
+class TrafficDataset(Dataset):
+    def __init__(self, file_path, processor, scalerX, scalerY, mode='train'):
+        # 獨立處理單一檔案
+        self.X, self.y = processor.process_file(file_path, scalerX, scalerY)
+        self.data_len = len(self.X)
 
+        # 定義切割比例
         train_ratio = 0.8
         val_ratio = 0.1
-        test_ratio = 0.1
-
+        
         if mode == 'train':
             self.start_idx = 0
-            self.end_idx = int(self.min_len * train_ratio)
+            self.end_idx = int(self.data_len * train_ratio)
         elif mode == 'val':
-            self.start_idx = int(self.min_len * train_ratio)
-            self.end_idx = int(self.min_len * (train_ratio + val_ratio))
+            self.start_idx = int(self.data_len * train_ratio)
+            self.end_idx = int(self.data_len * (train_ratio + val_ratio))
         elif mode == 'test':
-            self.start_idx = int(self.min_len * (train_ratio + val_ratio))
-            self.end_idx = self.min_len
+            self.start_idx = int(self.data_len * (train_ratio + val_ratio))
+            self.end_idx = self.data_len
         else:
             raise ValueError("Invalid mode. Must be 'train', 'val', or 'test'.")
 
@@ -80,13 +71,6 @@ class MultiTaskDataset(Dataset):
     
     def __getitem__(self, idx):
         real_idx = self.start_idx + idx
-        
-        x1 = torch.tensor(self.X_embb[real_idx], dtype=torch.float32)
-        x2 = torch.tensor(self.X_mmtc[real_idx], dtype=torch.float32)
-        x3 = torch.tensor(self.X_urllc[real_idx], dtype=torch.float32)
-
-        y1 = torch.tensor(self.y_embb[real_idx], dtype=torch.float32)
-        y2 = torch.tensor(self.y_mmtc[real_idx], dtype=torch.float32)
-        y3 = torch.tensor(self.y_urllc[real_idx], dtype=torch.float32)
-
-        return x1, x2, x3, y1, y2, y3
+        x = torch.tensor(self.X[real_idx], dtype=torch.float32)
+        y = torch.tensor(self.y[real_idx], dtype=torch.float32)
+        return x, y

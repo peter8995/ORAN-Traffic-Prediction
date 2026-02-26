@@ -19,8 +19,8 @@ def main():
     #Dataset
     processor = DataProcessor(sequenceLength)
 
-    embb_path = '../Dataset/Trial7/Raw/embb_11_18.csv'
-    mmtc_path = '../Dataset/Trial7/Raw/mmtc_11_18.csv'
+    embb_path = '../Dataset/Trial7/embb_03_03c.csv'
+    mmtc_path = '../Dataset/Trial7/Raw/mmtc_2.csv'
     urllc_path = '../Dataset/Trial7/Raw/urll_11_18.csv'
 
     def get_fitted_scalers(path):
@@ -66,41 +66,31 @@ def main():
     scalers_mmtc = get_fitted_scalers(mmtc_path)
     scalers_urllc = get_fitted_scalers(urllc_path)
 
-    train_dataset = MultiTaskDataset(
-        embb_path=embb_path, 
-        mmtc_path=mmtc_path, 
-        urllc_path=urllc_path, 
-        processor=processor,
-        scalers_embb=scalers_embb,
-        scalers_mmtc=scalers_mmtc,
-        scalers_urllc=scalers_urllc,
-        mode='train'
-    )
-    val_dataset = MultiTaskDataset(
-        embb_path=embb_path, 
-        mmtc_path=mmtc_path, 
-        urllc_path=urllc_path, 
-        processor=processor,
-        scalers_embb=scalers_embb,
-        scalers_mmtc=scalers_mmtc,
-        scalers_urllc=scalers_urllc,
-        mode='val'
-    )
-
-    test_dataset = MultiTaskDataset(
-        embb_path=embb_path, 
-        mmtc_path=mmtc_path, 
-        urllc_path=urllc_path, 
-        processor=processor,
-        scalers_embb=scalers_embb,
-        scalers_mmtc=scalers_mmtc,
-        scalers_urllc=scalers_urllc,
-        mode='test'
-    )
+    train_ds_embb = TrafficDataset(embb_path, processor, scalers_embb[0], scalers_embb[1], mode='train')
+    train_ds_mmtc = TrafficDataset(mmtc_path, processor, scalers_mmtc[0], scalers_mmtc[1], mode='train')
+    train_ds_urllc = TrafficDataset(urllc_path, processor, scalers_urllc[0], scalers_urllc[1], mode='train')
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    train_loader_embb = DataLoader(train_ds_embb, batch_size=batch_size, shuffle=True)
+    train_loader_mmtc = DataLoader(train_ds_mmtc, batch_size=batch_size, shuffle=True)
+    train_loader_urllc = DataLoader(train_ds_urllc, batch_size=batch_size, shuffle=True)
+
+    val_ds_embb = TrafficDataset(embb_path, processor, scalers_embb[0], scalers_embb[1], mode='val')
+    val_ds_mmtc = TrafficDataset(mmtc_path, processor, scalers_mmtc[0], scalers_mmtc[1], mode='val')
+    val_ds_urllc = TrafficDataset(urllc_path, processor, scalers_urllc[0], scalers_urllc[1], mode='val')
+
+    val_loader_embb = DataLoader(val_ds_embb, batch_size=batch_size, shuffle=False)
+    val_loader_mmtc = DataLoader(val_ds_mmtc, batch_size=batch_size, shuffle=False)
+    val_loader_urllc = DataLoader(val_ds_urllc, batch_size=batch_size, shuffle=False)
+
+    test_ds_embb = TrafficDataset(embb_path, processor, scalers_embb[0], scalers_embb[1], mode='test')
+    test_ds_mmtc = TrafficDataset(mmtc_path, processor, scalers_mmtc[0], scalers_mmtc[1], mode='test')
+    test_ds_urllc = TrafficDataset(urllc_path, processor, scalers_urllc[0], scalers_urllc[1], mode='test')
+
+    test_loader_embb = DataLoader(test_ds_embb, batch_size=batch_size, shuffle=False)
+    test_loader_mmtc = DataLoader(test_ds_mmtc, batch_size=batch_size, shuffle=False)
+    test_loader_urllc = DataLoader(test_ds_urllc, batch_size=batch_size, shuffle=False)
+
+
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"---------------------------------------")
@@ -150,41 +140,36 @@ def main():
         epochs_loss_embb = 0.0
         epochs_loss_mmtc = 0.0
         epochs_loss_urllc = 0.0
-
-        for i, (x1, x2, x3, y1, y2, y3) in enumerate(train_loader):
-            x_embb, y_embb = x1.to(device), y1.to(device)
-            x_mmtc, y_mmtc = x2.to(device), y2.to(device)
-            x_urllc, y_urllc = x3.to(device), y3.to(device)
-
-            # Train embb model
+        for x, y in train_loader_embb:
+            x, y = x.to(device), y.to(device)
             opt_embb.zero_grad()
-            pred_embb = model_embb(x_embb)
-            loss_embb = criterion_mse(pred_embb, y_embb)
-            loss_embb.backward()
+            pred = model_embb(x)
+            loss = criterion_mse(pred, y)
+            loss.backward()
             opt_embb.step()
-            epochs_loss_embb += loss_embb.item()
-
-            # Train mmtc model
-            opt_mmtc.zero_grad()
-            pred_mmtc = model_mmtc(x_mmtc)
-            loss_mmtc = quantile_loss(pred_mmtc, y_mmtc, 0.7)
-            loss_mmtc.backward()
-            opt_mmtc.step()
-            epochs_loss_mmtc += loss_mmtc.item()
-
-            # Train urllc model
-            opt_urllc.zero_grad()
-            pred_urllc = model_urllc(x_urllc)
-            loss_urllc = criterion_mse(pred_urllc, y_urllc)
-            loss_urllc.backward()
-            opt_urllc.step()
-            epochs_loss_urllc += loss_urllc.item()
-
+            epochs_loss_embb += loss.item()
         
+        for x, y in train_loader_mmtc:
+            x, y = x.to(device), y.to(device)
+            opt_mmtc.zero_grad()
+            pred = model_mmtc(x)
+            loss = criterion_mse(pred, y)
+            loss.backward()
+            opt_mmtc.step()
+            epochs_loss_mmtc += loss.item()
+        
+        for x, y in train_loader_urllc:
+            x, y = x.to(device), y.to(device)
+            opt_urllc.zero_grad()
+            pred = model_urllc(x)
+            loss = criterion_mse(pred, y)
+            loss.backward()
+            opt_urllc.step()
+            epochs_loss_urllc += loss.item()
 
-        epochs_loss_embb /= len(train_loader)
-        epochs_loss_mmtc /= len(train_loader)
-        epochs_loss_urllc /= len(train_loader)
+        epochs_loss_embb /= len(train_loader_embb)
+        epochs_loss_mmtc /= len(train_loader_mmtc)
+        epochs_loss_urllc /= len(train_loader_urllc)
 
         train_losses_embb.append(epochs_loss_embb)
         train_losses_mmtc.append(epochs_loss_mmtc)
@@ -199,25 +184,27 @@ def main():
         val_loss_urllc = 0.0
 
         with torch.no_grad():
-            for i, (x1, x2, x3, y1, y2, y3) in enumerate(val_loader):
-                x_embb, y_embb = x1.to(device), y1.to(device)
-                x_mmtc, y_mmtc = x2.to(device), y2.to(device)
-                x_urllc, y_urllc = x3.to(device), y3.to(device)
+            for x, y in val_loader_embb:
+                x, y = x.to(device), y.to(device)
+                pred = model_embb(x)
+                loss = criterion_mse(pred, y)
+                val_loss_embb += loss.item()
+            
+            for x, y in val_loader_mmtc:
+                x, y = x.to(device), y.to(device)
+                pred = model_mmtc(x)
+                loss = criterion_mse(pred, y)
+                val_loss_mmtc += loss.item()
 
-                # embb val
-                pred_embb = model_embb(x_embb)
-                val_loss_embb += criterion_mse(pred_embb, y_embb).item()
+            for x, y in val_loader_urllc:
+                x, y = x.to(device), y.to(device)
+                pred = model_urllc(x)
+                loss = criterion_mse(pred, y)
+                val_loss_urllc += loss.item()
 
-                # mmtc val
-                pred_mmtc = model_mmtc(x_mmtc)
-                val_loss_mmtc += quantile_loss(pred_mmtc, y_mmtc, 0.7).item()
-                
-                # uRLLC Val
-                pred_urllc = model_urllc(x_urllc)
-                val_loss_urllc += criterion_mse(pred_urllc, y_urllc).item() 
-        val_loss_embb /= len(val_loader)
-        val_loss_mmtc /= len(val_loader)
-        val_loss_urllc /= len(val_loader)
+        val_loss_embb /= len(val_loader_embb)
+        val_loss_mmtc /= len(val_loader_mmtc)
+        val_loss_urllc /= len(val_loader_urllc)
 
         val_losses_embb.append(val_loss_embb)
         val_losses_mmtc.append(val_loss_mmtc)
@@ -240,29 +227,29 @@ def main():
     model_mmtc.eval()
     model_urllc.eval()
     with torch.no_grad():
-        for i, (x1, x2, x3, y1, y2, y3) in enumerate(test_loader):
-            x_embb, y_embb = x1.to(device), y1.to(device)
-            x_mmtc, y_mmtc = x2.to(device), y2.to(device)
-            x_urllc, y_urllc = x3.to(device), y3.to(device)
+        for x, y in test_loader_embb:
+            x, y = x.to(device), y.to(device)
+            pred = model_embb(x)
+            p_np = pred.cpu().numpy()
+            y_np = y.cpu().numpy()
+            embb_pred.append(p_np)
+            embb_target.append(y_np)
 
-            pred_embb = model_embb(x_embb)
-            pred_mmtc = model_mmtc(x_mmtc)
-            pred_urllc = model_urllc(x_urllc)
+        for x, y in test_loader_mmtc:
+            x, y = x.to(device), y.to(device)
+            pred = model_mmtc(x)
+            p_np = pred.cpu().numpy()
+            y_np = y.cpu().numpy()
+            mmtc_pred.append(p_np)
+            mmtc_target.append(y_np)
 
-            embb_p_np = pred_embb.cpu().numpy()
-            embb_y_np = y_embb.cpu().numpy()
-            mmtc_p_np = pred_mmtc.cpu().numpy()
-            mmtc_y_np = y_mmtc.cpu().numpy()
-            urllc_p_np = pred_urllc.cpu().numpy()
-            urllc_y_np = y_urllc.cpu().numpy()
-
-            embb_pred.append(embb_p_np)
-            embb_target.append(embb_y_np)
-            mmtc_pred.append(mmtc_p_np)
-            mmtc_target.append(mmtc_y_np)
-            urllc_pred.append(urllc_p_np)
-            urllc_target.append(urllc_y_np)
-    
+        for x, y in test_loader_urllc:
+            x, y = x.to(device), y.to(device)
+            pred = model_urllc(x)
+            p_np = pred.cpu().numpy()
+            y_np = y.cpu().numpy()
+            urllc_pred.append(p_np)
+            urllc_target.append(y_np)    
     print("Data collect complete!")
 
     embb_prediction = np.concatenate(embb_pred, axis=0)
@@ -286,7 +273,7 @@ def main():
     plt.plot(val_losses_embb, label='Val')
     plt.title('eMBB Loss')
     plt.xlabel('Epochs')
-    plt.ylabel('Loss (MSE)')
+    plt.ylabel('Loss')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
@@ -296,7 +283,7 @@ def main():
     plt.plot(val_losses_mmtc, label='Val')
     plt.title('mMTC Loss')
     plt.xlabel('Epochs')
-    plt.ylabel('Loss (Huber)')
+    plt.ylabel('Loss')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
@@ -306,7 +293,7 @@ def main():
     plt.plot(val_losses_urllc, label='Val')
     plt.title('uRLLC Loss')
     plt.xlabel('Epochs')
-    plt.ylabel('Loss (Huber)')
+    plt.ylabel('Loss')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
