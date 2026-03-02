@@ -20,7 +20,7 @@ def main():
     processor = DataProcessor(sequenceLength)
 
     embb_path = '../Dataset/Trial7/embb_03_03c.csv'
-    mmtc_path = '../Dataset/Trial7/Raw/mmtc_2.csv'
+    mmtc_path = '../Dataset/Trial7/mmtc_2.csv'
     urllc_path = '../Dataset/Trial7/Raw/urll_11_18.csv'
 
     def get_fitted_scalers(path):
@@ -153,7 +153,7 @@ def main():
             x, y = x.to(device), y.to(device)
             opt_mmtc.zero_grad()
             pred = model_mmtc(x)
-            loss = criterion_mse(pred, y)
+            loss = quantile_loss(pred, y, 0.7)
             loss.backward()
             opt_mmtc.step()
             epochs_loss_mmtc += loss.item()
@@ -193,7 +193,7 @@ def main():
             for x, y in val_loader_mmtc:
                 x, y = x.to(device), y.to(device)
                 pred = model_mmtc(x)
-                loss = criterion_mse(pred, y)
+                loss = quantile_loss(pred, y, 0.7)
                 val_loss_mmtc += loss.item()
 
             for x, y in val_loader_urllc:
