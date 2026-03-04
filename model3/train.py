@@ -19,9 +19,9 @@ def main():
     #Dataset
     processor = DataProcessor(sequenceLength)
 
-    embb_path = '../Dataset/Trial7/embb_03_03c.csv'
-    mmtc_path = '../Dataset/Trial7/mmtc_2.csv'
-    urllc_path = '../Dataset/Trial7/Raw/urll_11_18.csv'
+    embb_path = '../Dataset/Tractor/Trial7/embb_03_03c.csv'
+    mmtc_path = '../Dataset/Tractor/Trial7/mmtc_2.csv'
+    urllc_path = '../Dataset/Tractor/Trial7/Raw/urll_11_18.csv'
 
     def get_fitted_scalers(path):
         print(f"\n{'='*20} Checking data: {path} {'='*20}") 
