@@ -13,7 +13,7 @@ class DataProcessor:
             'tx_brate downlink [Mbps]', 'rx_brate uplink [Mbps]', 
             'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 
             'tx_pkts downlink', 'rx_pkts uplink', 'ul_rssi']
-        self.target = 'sum_requested_prbs'
+        self.target = 'sum_granted_prbs'
     
     def load_and_clean(self, file_path):
         df = pd.read_csv(file_path)
