@@ -27,7 +27,11 @@ class DataProcessor:
 
     def process_file(self, file_path, scalerX, scalerY):
         df = self.load_and_clean(file_path)
-
+        
+        # Avoid crashing when processing extremely small files that can't fulfill 1 sequence length sliding window.
+        if len(df) <= self.sequenceLength:
+            return np.array([]), np.array([])
+            
         dataX = df[self.features].values
         dataY = df[[self.target]].values
 
@@ -44,33 +48,58 @@ class DataProcessor:
 
         return np.array(X_windows), np.array(y_windows)
 
-class TrafficDataset(Dataset):
-    def __init__(self, file_path, processor, scalerX, scalerY, mode='train'):
-        # 獨立處理單一檔案
-        self.X, self.y = processor.process_file(file_path, scalerX, scalerY)
-        self.data_len = len(self.X)
-
-        # 定義切割比例
-        train_ratio = 0.8
-        val_ratio = 0.1
+    def accumulate_files(self, directories, slice_type=None):
+        """Recursively fetches all *metrics.csv filepaths given a specific list of directory."""
+        csv_files = []
         
-        if mode == 'train':
-            self.start_idx = 0
-            self.end_idx = int(self.data_len * train_ratio)
-        elif mode == 'val':
-            self.start_idx = int(self.data_len * train_ratio)
-            self.end_idx = int(self.data_len * (train_ratio + val_ratio))
-        elif mode == 'test':
-            self.start_idx = int(self.data_len * (train_ratio + val_ratio))
-            self.end_idx = self.data_len
-        else:
-            raise ValueError("Invalid mode. Must be 'train', 'val', or 'test'.")
+        target_folder = slice_type
+        if slice_type == 'mmtc':
+            target_folder = 'mtc'
+            
+        for directory in directories:
+            # os.walk is handy for exploring nested subdirectories
+            for root, dirs, files in os.walk(directory):
+                # Filter by slice_type if provided by matching the current parent folder name
+                path_parts = root.split(os.sep)
+                if target_folder and target_folder not in path_parts:
+                    continue
+                    
+                for file in files:
+                    if file.endswith("metrics.csv"):
+                        csv_files.append(os.path.join(root, file))
+        return csv_files
+
+    def process_directories(self, directories, scalerX, scalerY, slice_type=None):
+        files = self.accumulate_files(directories, slice_type)
+        print(f"Discovered {len(files)} metrics.csv files for slice '{slice_type}' in provided directories.")
+        all_x, all_y = [], []
+
+        for f in files:
+            file_x, file_y = self.process_file(f, scalerX, scalerY)
+            if len(file_x) > 0:
+                all_x.append(file_x)
+                all_y.append(file_y)
+
+        if len(all_x) == 0:
+            return np.array([]), np.array([])
+
+        final_x = np.concatenate(all_x, axis=0)
+        final_y = np.concatenate(all_y, axis=0)
+        return final_x, final_y
+
+class TrafficDataset(Dataset):
+    def __init__(self, directories, processor, scalerX, scalerY, slice_type=None):
+        # 透過 process_directories 可以確保獨立檔案處理不會有 Time-Series Bleeding 交疊的情形
+        self.X, self.y = processor.process_directories(directories, scalerX, scalerY, slice_type)
+        self.data_len = len(self.X)
+        
+        # Train / Validation splitting is now dynamically generated via torch slicing within train.py, 
+        # testing relies exclusively on this root instantiation.
 
     def __len__(self):
-        return self.end_idx - self.start_idx
+        return self.data_len
     
     def __getitem__(self, idx):
-        real_idx = self.start_idx + idx
-        x = torch.tensor(self.X[real_idx], dtype=torch.float32)
-        y = torch.tensor(self.y[real_idx], dtype=torch.float32)
+        x = torch.tensor(self.X[idx], dtype=torch.float32)
+        y = torch.tensor(self.y[idx], dtype=torch.float32)
         return x, y
