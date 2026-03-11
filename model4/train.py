@@ -218,7 +218,7 @@ def main():
     print(f"✅ Loss curve saved to: {loss_save_path}")
     
     # Plot Prediction Comparison (Only plot first 2000 points if massive to prevent crash)
-    max_plot_pts = min(len(test_target), 4000)
+    max_plot_pts = min(len(test_target), 10000)
     plt.figure(figsize=(10, 5))
     plt.plot(test_target[:max_plot_pts], label='Target (Actual)', color='blue', alpha=0.6)
     plt.plot(test_prediction[:max_plot_pts], label='Prediction', color='orange', alpha=0.8)
