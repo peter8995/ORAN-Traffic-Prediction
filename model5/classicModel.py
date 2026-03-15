@@ -84,17 +84,16 @@ class TrafficModel(nn.Module):
                 sequenceModel=biLSTMModel(inputSize=768, hiddenSize=64, numLayers=1)
             )
 
-        self.head = nn.Linear(128, 1)
         self.attention = nn.MultiheadAttention(embed_dim=128, num_heads=4, batch_first=True)
         self.ff = nn.Sequential(nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, 32), nn.ReLU())
         self.fc = nn.Sequential(nn.Linear(32, 1))
-        
+
         # New Spike head for multi-task learning (Binary Classification)
+        # No Sigmoid here — BCEWithLogitsLoss handles it for numerical stability
         self.spike_head = nn.Sequential(
             nn.Linear(128, 32),
             nn.ReLU(),
-            nn.Linear(32, 1),
-            nn.Sigmoid()
+            nn.Linear(32, 1)
         )
     
     def forward(self, x):

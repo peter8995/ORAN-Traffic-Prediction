@@ -18,37 +18,52 @@ class DataProcessor:
         # Spike detection parameters based on the paper
         # If dataset is 1 data point per 500ms:
         # 1 minute = 120 points, 10 minutes = 1200 points
-        self.L = 1200  # 10-minute window for the 90th percentile
-        self.m = 1200  # Recent 10-minute volatility window for standard deviation
-        self.psi = 0.5 # Dynamic threshold adjustment parameter
-        self.xi_max = 1.0 # Will be updated dynamically
+        self.L = 1200    # 10-minute window for the 90th percentile (Q_0.9 baseline)
+        self.m = 120     # 1-minute rolling window for recent volatility (xi_m)
+        self.psi = 0.05  # Dynamic threshold adjustment parameter (±5% as per paper)
+        self.xi_max = 1.0  # Global xi_max — set via fit_spike_params() before training
     
+    def fit_spike_params(self, train_files):
+        """
+        Compute the global xi_max from all training files.
+        Must be called with the training file list before building any Dataset,
+        so spike thresholds are consistent across all files.
+        """
+        all_xi = []
+        for f in train_files:
+            df = self.load_and_clean(f)
+            if len(df) <= self.sequenceLength:
+                continue
+            target_series = pd.Series(df[[self.target]].values.flatten())
+            xi_m = target_series.rolling(window=self.m, min_periods=1).std().fillna(0)
+            if xi_m.max() > 0:
+                all_xi.append(xi_m.max())
+
+        self.xi_max = max(all_xi) if all_xi else 1.0
+        print(f"[SpikeAwareLSTM] Global xi_max set to {self.xi_max:.4f} from {len(all_xi)} training files.")
+
     def calculate_spike_labels(self, target_data):
         """
         Calculate spike labels based on the adaptive threshold formula:
-        tau_spike = Q0.9(Y_{t-L:t}) * (1 +/- psi * (xi_m / xi_max))
+        tau_spike = Q0.9(Y_{t-L:t}) * (1 + psi * (xi_m / xi_max))
+
+        xi_max is the global training-set maximum volatility set by fit_spike_params().
         """
-        s_labels = np.zeros(len(target_data))
-        
         # Calculate trailing 90th percentile and rolling standard deviations
         target_series = pd.Series(target_data.flatten())
-        
+
         # q_0_9 is Q_{0.9}(Y_{t-L:t})
         q_0_9 = target_series.rolling(window=self.L, min_periods=1).quantile(0.9)
-        
+
         # xi_m is the standard deviation calculated over recent volatility window m
         xi_m = target_series.rolling(window=self.m, min_periods=1).std().fillna(0)
-        
-        # xi_max is the maximum volatility observed (we adapt this to the current file)
-        xi_max = xi_m.max() if xi_m.max() > 0 else 1.0
-        
-        # Calculate dynamic threshold
-        # We use + for the upper threshold to detect spikes
-        tau_spike = q_0_9 * (1 + self.psi * (xi_m / xi_max))
-        
+
+        # Use global xi_max from fit_spike_params() for consistent thresholds across files
+        tau_spike = q_0_9 * (1 + self.psi * (xi_m / self.xi_max))
+
         # Label as spike if actual target exceeds threshold
         s_labels = (target_series > tau_spike).astype(int).values
-        
+
         return s_labels
     
     def load_and_clean(self, file_path):
@@ -66,7 +81,7 @@ class DataProcessor:
         
         # Avoid crashing when processing extremely small files that can't fulfill 1 sequence length sliding window.
         if len(df) <= self.sequenceLength:
-            return np.array([]), np.array([])
+            return np.array([]), np.array([]), np.array([])
             
         dataX = df[self.features].values
         dataY = df[[self.target]].values

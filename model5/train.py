@@ -73,20 +73,31 @@ def main():
     if not train_files:
         raise ValueError("No metrics.csv files found in the provided --train_dirs!")
 
-    print(f"Discovered {len(train_files)} files. Examining the first file to establish MinMaxScaler:")
-    
-    # 建立Scaler (僅基於第一個找到的檔案來建立，或也可以將所有訓練集合併後再 fit)
-    # 這裡我們為了快速建立 scaler，採用將前幾個檔案合併或是讀取全部 DataFrame 的方式
-    # 在這裡我們直接利用第一個檔案來建立基本 Scaling。如果不同檔案間 distribution 差異過大，
-    # 會建議做 global pass。
-    df_scaler_target = processor.load_and_clean(train_files[0])
-    train_X_sample = df_scaler_target[processor.features].values
-    train_Y_sample = df_scaler_target[[processor.target]].values
+    # Compute global xi_max across all training files BEFORE building any Dataset
+    # so spike thresholds are consistent (not per-file relative)
+    processor.fit_spike_params(train_files)
+
+    print(f"Discovered {len(train_files)} files. Building global MinMaxScaler from ALL training files:")
+
+    # Global fit: scan all training files to establish consistent scaling
+    all_X_raw, all_Y_raw = [], []
+    for f in train_files:
+        df = processor.load_and_clean(f)
+        if len(df) <= sequenceLength:
+            continue
+        all_X_raw.append(df[processor.features].values)
+        all_Y_raw.append(df[[processor.target]].values)
+
+    if not all_X_raw:
+        raise ValueError("No valid training files found after filtering by sequence length!")
 
     scalerX = MinMaxScaler()
     scalerY = MinMaxScaler()
-    scalerX.fit(train_X_sample)
-    scalerY.fit(train_Y_sample)
+    scalerX.fit(np.concatenate(all_X_raw, axis=0))
+    scalerY.fit(np.concatenate(all_Y_raw, axis=0))
+    del all_X_raw, all_Y_raw  # Free memory after fitting
+
+    print(f"Global scalers fitted on {len(train_files)} files.")
     
     # Load combined dataset across all train_dirs
     print(f"\nBuilding comprehensive Training & Validation Dataset...")
@@ -126,7 +137,8 @@ def main():
     
     opt = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion_mse = nn.MSELoss()
-    criterion_bce = nn.BCELoss()
+    # BCEWithLogitsLoss = Sigmoid + BCE in one op, numerically more stable than BCELoss + Sigmoid
+    criterion_bce = nn.BCEWithLogitsLoss()
 
     train_losses = []
     val_losses = []
@@ -152,6 +164,7 @@ def main():
             loss = loss_reg + lambda_detect * loss_spike
                 
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             opt.step()
             epochs_loss += loss.item()
 
@@ -219,7 +232,8 @@ def main():
     test_spike_targets = np.concatenate(test_spike_target, axis=0)
     
     # Calculate Spike Detection Metrics
-    spike_preds_binary = (test_spike_prediction > 0.5).astype(int)
+    # spike_head outputs logits (no Sigmoid), so threshold is 0.0 (== sigmoid > 0.5)
+    spike_preds_binary = (test_spike_prediction > 0.0).astype(int)
     
     # Avoid division by zero warnings
     tp = np.sum((spike_preds_binary == 1) & (test_spike_targets == 1))
@@ -235,10 +249,15 @@ def main():
     print("\n" + "="*40)
     print("Spike Detection Performance Metrics:")
     print("="*40)
+    fp_rate = fp / (fp + tn) if (fp + tn) > 0 else 0
+    fn_rate = fn / (fn + tp) if (fn + tp) > 0 else 0
+
     print(f"Accuracy:  {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
     print(f"Recall:    {recall:.4f}")
     print(f"F1 Score:  {f1:.4f}")
+    print(f"FP Rate:   {fp_rate:.4f}")
+    print(f"FN Rate:   {fn_rate:.4f}")
     print(f"Spike Rate: {np.mean(test_spike_targets)*100:.2f}% of test samples")
     print("="*40 + "\n")
 
@@ -277,6 +296,39 @@ def main():
     pred_save_path = os.path.join(result_dir, f'{slice_type}_multi_dir_prediction.png')
     plt.savefig(pred_save_path, dpi=300)
     print(f"✅ Image saved to: {pred_save_path}")
+
+    # Plot Spike Detection Visualization (similar to paper Figures 3-5)
+    max_spike_pts = min(len(test_target), 10000)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 6), sharex=True,
+                                    gridspec_kw={'height_ratios': [3, 1], 'hspace': 0.05})
+
+    # Top: Resource demand prediction
+    ax1.plot(test_target[:max_spike_pts], label='Actual RAN Demand', color='blue', alpha=0.7, linewidth=0.8)
+    ax1.plot(test_prediction[:max_spike_pts], label='Predicted RAN Demand', color='red', linestyle='--', alpha=0.7, linewidth=0.8)
+    ax1.set_ylabel('Traffic (Granted PRBs)')
+    ax1.set_title(f'{slice_type.upper()} Resource Demand Prediction & Spike Detection')
+    ax1.legend(loc='upper right')
+    ax1.grid(True, alpha=0.3)
+
+    # Bottom: Spike detection bar (green = spike detected, white = normal)
+    spike_binary_plot = spike_preds_binary[:max_spike_pts].flatten()
+    spike_gt_plot = test_spike_targets[:max_spike_pts].flatten().astype(int)
+    x_axis = np.arange(max_spike_pts)
+
+    ax2.fill_between(x_axis, 0, 1, where=(spike_gt_plot == 1),
+                     color='green', alpha=0.3, label='Ground Truth Spike', step='mid')
+    ax2.fill_between(x_axis, 0, 1, where=(spike_binary_plot == 1),
+                     color='red', alpha=0.4, label='Predicted Spike', step='mid')
+    ax2.set_yticks([0, 1])
+    ax2.set_yticklabels(['Normal', 'Peak'])
+    ax2.set_xlabel('Time Steps')
+    ax2.legend(loc='upper right', fontsize=8)
+    ax2.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    spike_save_path = os.path.join(result_dir, f'{slice_type}_spike_detection.png')
+    plt.savefig(spike_save_path, dpi=300)
+    print(f"✅ Spike detection plot saved to: {spike_save_path}")
 
 if __name__ == "__main__":
     main()
