@@ -10,6 +10,8 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model1/`**: Implements a unified multi-task predictive model.
 - **`model2/`**: Implements independent predictive models for each network slice (MSE Loss).
 - **`model3/`**: Implements independent predictive models, using tailored loss functions (e.g., Quantile Loss for mMTC).
+- **`model4/`**: Implements a dynamic Colosseum ORAN dataset model with directory range parsing.
+- **`model5/`**: Implements the SpikeAwareLSTM model for traffic prediction with dual-head spike detection.
 
 ## 📊 Datasets
 
@@ -40,6 +42,16 @@ Similar to `model2`, this approaches the problem using three independent models 
 - **Loss**: 
   - **eMBB** & **uRLLC**: Trained with Mean Squared Error (MSE) loss.
   - **mMTC**: Trained using **Quantile Loss** (e.g., q=0.7) to better account for the high variance, burstiness, and outlier characteristics typical of Machine Type Communications.
+
+### Model 4: Dynamic Colosseum Model (`model4/`)
+A model designed to integrate dynamically with the Colosseum ORAN Coloran dataset, supporting directory-based range training (e.g., `tr0-4`).
+- **Data Extensibility**: Incorporates customized command-line argument parsing to handle variable directory ranges during training.
+
+### Model 5: SpikeAwareLSTM Model (`model5/`)
+A model designed for improved O-RAN traffic prediction by explicitly accounting for traffic spikes.
+- **Architecture**: Incorporates a `SpikeAwareLSTM` model with a dual-head output structure: one head for resource demand regression and another for spike probability classification.
+- **Loss**: Computes a composite loss function combining standard regression loss with classification loss for spike detection.
+- **Data Processing**: Includes custom data processing logic (`DataProcessor`) to automatically calculate, label, and integrate traffic spikes dynamically based on historical data averages.
 
 ## 🚀 Getting Started
 
