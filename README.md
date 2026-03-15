@@ -48,10 +48,12 @@ A model designed to integrate dynamically with the Colosseum ORAN Coloran datase
 - **Data Extensibility**: Incorporates customized command-line argument parsing to handle variable directory ranges during training.
 
 ### Model 5: SpikeAwareLSTM Model (`model5/`)
-A model designed for improved O-RAN traffic prediction by explicitly accounting for traffic spikes.
-- **Architecture**: Incorporates a `SpikeAwareLSTM` model with a dual-head output structure: one head for resource demand regression and another for spike probability classification.
-- **Loss**: Computes a composite loss function combining standard regression loss with classification loss for spike detection.
-- **Data Processing**: Includes custom data processing logic (`DataProcessor`) to automatically calculate, label, and integrate traffic spikes dynamically based on historical data averages.
+A multi-task learning model inspired by the SpikeAwareLSTM architecture from ["Proactive AI-and-RAN Workload Orchestration in O-RAN Architectures for 6G Networks"](https://doi.org/10.1109/OJCOMS.2025.3608700), integrating anomaly (spike) detection directly within the prediction pipeline.
+- **Architecture**: Dual-head output from shared ViT+LSTM+Attention backbone — one head for resource demand regression and another for spike probability classification (via `BCEWithLogitsLoss`).
+- **Loss**: Composite loss `L = L_MSE + λ_detect × L_BCE`, where `λ_detect` (default 0.5) controls the trade-off between prediction accuracy and spike detection. Gradient clipping (`max_norm=1.0`) is applied for training stability.
+- **Spike Detection**: Adaptive threshold labeling based on the paper's formula: `τ = Q_0.9 × (1 + ψ × ξ_m / ξ_max)`, with global `xi_max` computed across all training files via `fit_spike_params()`. Labels are generated on raw (unscaled) target values before MinMaxScaler transformation.
+- **Data Processing**: Global `MinMaxScaler` fitted on all training files for consistent scaling. `DataProcessor` returns `(X, y, spike_labels)` triplets.
+- **Evaluation**: Reports Precision, Recall, F1, Accuracy, FP Rate, and FN Rate for spike detection. Generates a dual-subplot visualization (demand prediction + spike detection overlay).
 
 ## 🚀 Getting Started
 
@@ -66,11 +68,28 @@ A model designed for improved O-RAN traffic prediction by explicitly accounting 
 Ensure the datasets are located in the `Dataset/` directory. The scripts are configured to look for CSV files representing the slices (e.g., `embb_11_18.csv`, `mmtc_11_18.csv`, `urll_11_18.csv`) within subdirectories like `Dataset/Tractor/Trial7/Raw/`.
 
 ### Training
-To train any of the models, navigate to the specific model's directory and run `train.py`:
+For models 1-3, navigate to the model directory and run directly:
 ```bash
 cd model1
 python train.py
 ```
 
+For models 4-5, use CLI arguments to specify dataset directories and hyperparameters:
+```bash
+cd model5
+python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
+  --slice_type embb \
+  --epochs 500 \
+  --batch_size 1024 \
+  --learning_rate 1e-6 \
+  --sequence_length 15 \
+  --val_split 0.2 \
+  --lambda_detect 0.5   # model5 only: spike detection loss weight
+```
+Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
+
 ### Results
-During and after training, the scripts will generate evaluation metrics and save visualization plots (prediction comparisons and loss curves) in a newly created `results/` folder within the respective model's directory.
+During and after training, the scripts will generate evaluation metrics and save visualization plots in a `results/` folder within the respective model's directory:
+- **Loss curve**: `{slice_type}_multi_dir_loss_curve.png`
+- **Prediction comparison**: `{slice_type}_multi_dir_prediction.png`
+- **Spike detection** (model5 only): `{slice_type}_spike_detection.png` — dual-subplot with demand prediction (top) and ground truth vs predicted spike overlay (bottom)
