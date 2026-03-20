@@ -4,9 +4,9 @@ import torchvision.models as models
 import torch.nn.functional as F
 
 class vitModel(nn.Module):
-    def __init__(self, sequenceLength: int, inFeatures: int=11, pretrained=True):
+    def __init__(self, sequenceLength: int, inFeatures: int=11, pretrained=True, freeze=True):
         super(vitModel, self).__init__()
-        
+
         self.sequenceLength = sequenceLength
         self.inFeatures = inFeatures
 
@@ -16,6 +16,20 @@ class vitModel(nn.Module):
         num_tokens = sequenceLength + 1
         self.vit.encoder.pos_embedding = nn.Parameter(torch.randn(1, num_tokens, 768))
         self.vit.heads = nn.Identity()
+
+        if freeze:
+            # Freeze all ViT encoder layers except the last 2 transformer blocks
+            for param in self.vit.parameters():
+                param.requires_grad = False
+            # Unfreeze conv_proj (adapted for our input shape)
+            for param in self.vit.conv_proj.parameters():
+                param.requires_grad = True
+            # Unfreeze positional embedding (adapted for our sequence length)
+            self.vit.encoder.pos_embedding.requires_grad = True
+            # Unfreeze last 2 encoder blocks for fine-tuning
+            for block in self.vit.encoder.layers[-2:]:
+                for param in block.parameters():
+                    param.requires_grad = True
 
     def forward(self, x):
         x = x.unsqueeze(1)
@@ -91,15 +105,19 @@ class TrafficModel(nn.Module):
             )
             out_dim = 128  # bidirectional: 64 * 2
 
-        self.attention = nn.MultiheadAttention(embed_dim=out_dim, num_heads=4, batch_first=True)
-        self.ff = nn.Sequential(nn.Linear(out_dim, 64), nn.ReLU(), nn.Linear(64, 32), nn.ReLU())
+        self.attention = nn.MultiheadAttention(embed_dim=out_dim, num_heads=4, batch_first=True, dropout=0.1)
+        self.ff = nn.Sequential(
+            nn.Linear(out_dim, 64), nn.ReLU(), nn.Dropout(0.1),
+            nn.Linear(64, 32), nn.ReLU(), nn.Dropout(0.1),
+        )
         self.fc = nn.Sequential(nn.Linear(32, 1))
 
-        # New Spike head for multi-task learning (Binary Classification)
+        # Spike head for multi-task learning (Binary Classification)
         # No Sigmoid here — BCEWithLogitsLoss handles it for numerical stability
         self.spike_head = nn.Sequential(
             nn.Linear(out_dim, 32),
             nn.ReLU(),
+            nn.Dropout(0.1),
             nn.Linear(32, 1)
         )
     
@@ -113,7 +131,6 @@ class TrafficModel(nn.Module):
         pred = self.fc(ffOutput)
         
         # Anomaly detection task (Spike probability)
-        # We pass the context_vector before the regression FF layers
         spike_pred = self.spike_head(context_vector)
                       
         return pred, spike_pred

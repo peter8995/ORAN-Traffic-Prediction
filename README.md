@@ -12,6 +12,7 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model3/`**: Implements independent predictive models, using tailored loss functions (e.g., Quantile Loss for mMTC).
 - **`model4/`**: Implements a dynamic Colosseum ORAN dataset model with directory range parsing.
 - **`model5/`**: Implements the SpikeAwareLSTM model for traffic prediction with dual-head spike detection.
+- **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
 
 ## 📊 Datasets
 
@@ -55,6 +56,18 @@ A multi-task learning model inspired by the SpikeAwareLSTM architecture from ["P
 - **Data Processing**: Global `MinMaxScaler` fitted on all training files for consistent scaling. `DataProcessor` returns `(X, y, spike_labels)` triplets.
 - **Evaluation**: Reports Precision, Recall, F1, Accuracy, FP Rate, and FN Rate for spike detection. Generates a dual-subplot visualization (demand prediction + spike detection overlay).
 
+### Model 6: Anti-Overfitting SpikeAwareLSTM (`model6/`)
+Built on top of Model 5, this model addresses the severe overfitting problem observed in Model 5's training (validation loss diverging after ~75 epochs) by applying multiple regularization techniques.
+- **Architecture**: Same dual-head ViT+LSTM+Attention backbone as Model 5, with the following modifications:
+  - **ViT Backbone Freezing**: All ViT encoder layers are frozen except `conv_proj`, `pos_embedding`, and the last 2 transformer blocks, significantly reducing trainable parameters.
+  - **Dropout**: `Dropout(0.1)` added to FF layers, spike head, and attention (`dropout=0.1`).
+  - **Spike Head**: Shares gradient flow with the backbone (no gradient detachment), allowing end-to-end multi-task learning.
+- **Training**:
+  - `Adam` optimizer with `weight_decay` (default `1e-4`) for L2 regularization, applied only to trainable parameters.
+  - **Early stopping** with configurable `patience` (default 30 epochs) and automatic best model restoration.
+  - `pos_weight` for `BCEWithLogitsLoss` clamped to `--max_pos_weight` (default `5.0`) to prevent extreme class imbalance from causing all-positive spike predictions.
+- **Loss**: Same composite loss as Model 5: `L = L_MSE + λ_detect × L_BCE`, with `λ_detect` default `1.0`.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -74,7 +87,7 @@ cd model1
 python train.py
 ```
 
-For models 4-5, use CLI arguments to specify dataset directories and hyperparameters:
+For models 4-6, use CLI arguments to specify dataset directories and hyperparameters:
 ```bash
 cd model5
 python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
@@ -86,10 +99,26 @@ python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --val_split 0.2 \
   --lambda_detect 0.5   # model5 only: spike detection loss weight
 ```
+
+Model 6 adds additional arguments on top of model 5:
+```bash
+cd model6
+python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
+  --slice_type embb \
+  --epochs 500 \
+  --batch_size 1024 \
+  --learning_rate 1e-4 \
+  --sequence_length 15 \
+  --val_split 0.2 \
+  --lambda_detect 1.0 \
+  --weight_decay 1e-4 \
+  --patience 30 \
+  --max_pos_weight 5.0
+```
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
 
 ### Results
 During and after training, the scripts will generate evaluation metrics and save visualization plots in a `results/` folder within the respective model's directory:
 - **Loss curve**: `{slice_type}_multi_dir_loss_curve.png`
 - **Prediction comparison**: `{slice_type}_multi_dir_prediction.png`
-- **Spike detection** (model5 only): `{slice_type}_spike_detection.png` — dual-subplot with demand prediction (top) and ground truth vs predicted spike overlay (bottom)
+- **Spike detection** (model5/6): `{slice_type}_spike_detection.png` — dual-subplot with demand prediction (top) and ground truth vs predicted spike overlay (bottom)

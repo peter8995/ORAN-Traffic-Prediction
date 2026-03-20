@@ -47,8 +47,11 @@ def main():
     parser.add_argument('--learning_rate', type=float, default=1e-4, help="Learning rate")
     parser.add_argument('--sequence_length', type=int, default=15, help="Sequence length for the LSTM")
     parser.add_argument('--val_split', type=float, default=0.2, help="Percentage of training data to use for validation")
-    parser.add_argument('--lambda_detect', type=float, default=1.5, help="Weight for the spike detection BCE loss")
-    
+    parser.add_argument('--lambda_detect', type=float, default=1.0, help="Weight for the spike detection BCE loss")
+    parser.add_argument('--weight_decay', type=float, default=1e-4, help="L2 regularization weight decay")
+    parser.add_argument('--patience', type=int, default=30, help="Early stopping patience (0 to disable)")
+    parser.add_argument('--max_pos_weight', type=float, default=5.0, help="Clamp upper bound for spike BCE pos_weight")
+
     args = parser.parse_args()
 
     batch_size = args.batch_size
@@ -135,7 +138,13 @@ def main():
         inFeatures=len(processor.features), sliceType=slice_type
     ).to(device)
     
-    opt = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    # Only optimize parameters that require gradients (ViT frozen layers excluded)
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_count = sum(p.numel() for p in trainable_params)
+    print(f"Total params: {total_params:,} | Trainable: {trainable_count:,} ({100*trainable_count/total_params:.1f}%)")
+
+    opt = torch.optim.Adam(trainable_params, lr=learning_rate, weight_decay=args.weight_decay)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_epochs)
 
     criterion_mse = nn.MSELoss()
@@ -147,15 +156,23 @@ def main():
     n_pos = all_spike_labels.sum().item()
     n_neg = len(all_spike_labels) - n_pos
     if n_pos > 0:
-        pos_weight = torch.tensor([n_neg / n_pos]).to(device)
+        raw_pw = n_neg / n_pos
+        clamped_pw = min(raw_pw, args.max_pos_weight)
+        pos_weight = torch.tensor([clamped_pw]).to(device)
     else:
+        raw_pw = 1.0
+        clamped_pw = 1.0
         pos_weight = torch.tensor([1.0]).to(device)
-    print(f"Spike pos/neg ratio: {n_pos:.0f}/{n_neg:.0f}, pos_weight={pos_weight.item():.2f}")
+    print(f"Spike pos/neg ratio: {n_pos:.0f}/{n_neg:.0f}, raw_pos_weight={raw_pw:.2f}, clamped={clamped_pw:.2f}")
     # BCEWithLogitsLoss = Sigmoid + BCE in one op, numerically more stable than BCELoss + Sigmoid
     criterion_bce = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     train_losses = []
     val_losses = []
+    best_val_loss = float('inf')
+    best_model_state = None
+    patience_counter = 0
+    patience = args.patience
 
     for epoch in range(num_epochs):
         model.train()
@@ -210,6 +227,24 @@ def main():
         # Print every single epoch instead of every 10 epochs
         current_lr = scheduler.get_last_lr()[0]
         print(f"Epoch [{epoch+1}/{num_epochs}] | Train Loss: {epochs_loss:.5f} | Val Loss: {val_loss:.5f} | LR: {current_lr:.2e}")
+
+        # Early stopping
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model_state = {k: v.clone() for k, v in model.state_dict().items()}
+            patience_counter = 0
+        else:
+            patience_counter += 1
+
+        if patience > 0 and patience_counter >= patience:
+            print(f"\nEarly stopping at epoch {epoch+1} (no improvement for {patience} epochs)")
+            print(f"Best val loss: {best_val_loss:.5f}")
+            break
+
+    # Restore best model weights
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+        print(f"Restored best model (val_loss={best_val_loss:.5f})")
     
     # Testing
     test_pred = []

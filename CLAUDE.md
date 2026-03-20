@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-O-RAN traffic prediction using ViT + LSTM/BiLSTM architectures for 5G network slice types (eMBB, mMTC, uRLLC). Five progressive model iterations exist, each in its own directory.
+O-RAN traffic prediction using ViT + LSTM/BiLSTM architectures for 5G network slice types (eMBB, mMTC, uRLLC). Six progressive model iterations exist, each in its own directory.
 
 ## Training Commands
 
 Models 1-3 have hardcoded parameters; run directly with `python train.py` from the model directory.
 
-Models 4-5 use CLI arguments (run from model directory):
+Models 4-6 use CLI arguments (run from model directory):
 ```bash
 python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --slice_type embb \
@@ -22,6 +22,8 @@ python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
 ```
 
 Model 5 adds `--lambda_detect 0.5` for spike detection BCE loss weight.
+
+Model 6 adds `--weight_decay 1e-4`, `--patience 30` (early stopping), and `--max_pos_weight 5.0` (clamp spike BCE pos_weight) on top of model 5 args.
 
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
 
@@ -44,19 +46,22 @@ Forward pass: Input `(batch, seq_len, 11)` → ViT `(batch, seq_len+1, 768)` →
 | model3 | Slice-specific losses: quantile loss (q=0.7) for mMTC, MSE for others |
 | model4 | Multi-directory Colosseum dataset support via argparse, `parse_directory_args()` |
 | model5 | **SpikeAwareLSTM**: dual-head (regression + spike detection), adaptive threshold labels, BCEWithLogitsLoss, gradient clipping |
+| model6 | **Anti-overfitting**: ViT backbone frozen (last 2 blocks unfrozen), Dropout(0.3) in FF/spike heads, weight decay, early stopping with best model restore, spike head gradient detach, pos_weight clamp |
 
-## Model5 Spike Detection Details
+## Model5/6 Spike Detection Details
 
 - `fit_spike_params()` must be called before dataset creation to compute global `xi_max`
 - Spike labels computed on **raw (unscaled)** target values using adaptive threshold: `τ = Q_0.9 × (1 + 0.05 × ξ_m/ξ_max)`
 - Parameters: L=1200 (10-min Q0.9 window), m=120 (1-min volatility), ψ=0.05
 - `process_file()` returns `(X, y, spike_labels)` triplets
 - `forward()` returns `(pred, spike_logits)` — no Sigmoid in model, handled by BCEWithLogitsLoss
+- **Model6 only**: spike head uses `context_vector.detach()` to prevent spike gradients from biasing the shared backbone/regression pathway
+- **Model6 only**: `pos_weight` clamped to `--max_pos_weight` (default 5.0) to prevent extreme class imbalance from causing all-positive predictions
 
 ## Datasets
 
 - **TRACTOR**: `Dataset/Tractor/Trial{5,7}/` — used by models 1-3
-- **Colosseum**: `Dataset/colosseum-oran-coloran-dataset/tr{N}/` — used by models 4-5, organized as `tr{N}/exp{}/bs{}/{embb|mtc|urllc}/*metrics.csv`
+- **Colosseum**: `Dataset/colosseum-oran-coloran-dataset/tr{N}/` — used by models 4-6, organized as `tr{N}/exp{}/bs{}/{embb|mtc|urllc}/*metrics.csv`
 
 11 input features (dl_buffer, ul_buffer, tx/rx brate, ul_sinr, dl/ul_mcs, phr, tx/rx_pkts, ul_rssi). Target: `sum_granted_prbs` (model5) or `sum_requested_prbs` (others).
 
@@ -66,6 +71,35 @@ Note: `mmtc` slice type maps to folder name `mtc` in the dataset.
 
 - `clean_dataset.py` — Flattens nested CSV structure, removes non-metrics files (has dry-run mode)
 - `group_by_slice.py` — Reorganizes metrics.csv by slice type using IMSI UE ID mapping
+
+## Model6 Known Issues & Improvement Plans
+
+### Current Problems (as of 2026-03-19)
+- **Spike detection 完全失效：** `context_vector.detach()` 切斷梯度，spike head 學不到任何 pattern，幾乎全預測為 Normal
+- **迴歸低流量區偏高：** actual ~0.02 但 predicted ~0.04，正則化過強限制了表達能力
+- **過擬合已解決：** Loss curve 收斂正常，val loss 穩定（這點比 Model5 好）
+
+### Improvement Plan A (Recommended): 移除 detach + 降低正則化
+- `context_vector.detach()` → `context_vector`（恢復 spike head 梯度流）
+- Dropout 0.3 → 0.1（ff 層和 spike head）
+- 保留 ViT 凍結、weight decay、early stopping、pos_weight clamp
+- `lambda_detect` 預設改為 `1.0`
+- **優點：** 改動最小，直接修正根本問題
+- **風險：** spike 梯度可能干擾迴歸（但有 ViT 凍結 + early stopping 兜底）
+
+### Improvement Plan B: 分階段訓練 (Two-phase Training)
+- Phase 1（前 N epochs）：只訓練迴歸，`lambda_detect=0`，spike head 凍結
+- Phase 2（剩餘 epochs）：解凍 spike head，`lambda_detect=1.0`，降低 LR
+- 移除 `detach()`，Dropout 維持 0.2
+- **優點：** 迴歸品質有保障，spike head 在穩定 backbone 上學習
+- **風險：** 多一個超參數（phase 切換點），調參複雜度增加
+
+### Improvement Plan C: Gradient Scaling 取代 detach
+- 自訂 GradScaler layer，spike head 梯度乘以 0.1 再回傳 backbone
+- Dropout 降到 0.15
+- 保留其餘 Model6 設計
+- **優點：** 折衷方案，spike 能學但不主導 backbone
+- **風險：** 多一個 scaling 超參數，實作較複雜，效果不確定
 
 ## Dependencies
 
