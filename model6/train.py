@@ -50,7 +50,7 @@ def main():
     parser.add_argument('--lambda_detect', type=float, default=1.0, help="Weight for the spike detection BCE loss")
     parser.add_argument('--weight_decay', type=float, default=1e-4, help="L2 regularization weight decay")
     parser.add_argument('--patience', type=int, default=30, help="Early stopping patience (0 to disable)")
-    parser.add_argument('--max_pos_weight', type=float, default=5.0, help="Clamp upper bound for spike BCE pos_weight")
+    parser.add_argument('--max_pos_weight', type=float, default=7.0, help="Clamp upper bound for spike BCE pos_weight")
 
     args = parser.parse_args()
 

@@ -4,7 +4,7 @@ import torchvision.models as models
 import torch.nn.functional as F
 
 class vitModel(nn.Module):
-    def __init__(self, sequenceLength: int, inFeatures: int=11, pretrained=True, freeze=True):
+    def __init__(self, sequenceLength: int, inFeatures: int=11, pretrained=False, freeze=False):
         super(vitModel, self).__init__()
 
         self.sequenceLength = sequenceLength

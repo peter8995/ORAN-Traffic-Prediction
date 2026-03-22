@@ -13,6 +13,7 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model4/`**: Implements a dynamic Colosseum ORAN dataset model with directory range parsing.
 - **`model5/`**: Implements the SpikeAwareLSTM model for traffic prediction with dual-head spike detection.
 - **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
+- **`model_detect_peak/`**: Spike predictability baselines using Autoencoder and Isolation Forest (unsupervised anomaly detection).
 
 ## 📊 Datasets
 
@@ -68,13 +69,23 @@ Built on top of Model 5, this model addresses the severe overfitting problem obs
   - `pos_weight` for `BCEWithLogitsLoss` clamped to `--max_pos_weight` (default `5.0`) to prevent extreme class imbalance from causing all-positive spike predictions.
 - **Loss**: Same composite loss as Model 5: `L = L_MSE + λ_detect × L_BCE`, with `λ_detect` default `1.0`.
 
+### Spike Predictability Baselines (`model_detect_peak/`)
+Independent unsupervised/anomaly detection baselines to evaluate the inherent predictability of traffic spikes, without the full ViT+LSTM pipeline.
+- **Models**: Autoencoder (PyTorch) and Isolation Forest (scikit-learn).
+- **Input**: 17 features per timestep — 11 original O-RAN KPIs + 6 rolling temporal features (rolling mean/std/max over m=120, rolling mean/Q0.9 over L=1200, first-order difference). Sliding window of `seq_len=15` steps, flattened to a 255-dim vector.
+- **Rolling Features Rationale**: The spike ground truth is defined by long-range rolling statistics (L=1200 ~5min, m=120 ~30s), but the sliding window only covers ~3.75s. Rolling features compress long-term trends into each timestep, bridging this time-scale gap.
+- **Spike Labels**: Same adaptive threshold formula as model5/6: `τ = Q_0.9 × (1 + ψ × ξ_m / ξ_max)`, computed on raw (unscaled) target values.
+- **Autoencoder**: Trains on all data, flags samples with reconstruction error above a percentile threshold (default P88) as spikes.
+- **Isolation Forest**: Unsupervised anomaly detection with configurable contamination rate (default 0.11). Includes automatic threshold sweep to find the best F1.
+- **Evaluation**: Reports Precision, Recall, F1, Accuracy, FP/FN Rate. Generates score distribution plots and spike detection timeline visualizations.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Python 3.x
 - PyTorch
 - torchvision
-- scikit-learn
+- scikit-learn (MinMaxScaler, IsolationForest)
 - pandas, numpy, matplotlib
 
 ### Data Preparation
@@ -116,6 +127,19 @@ python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --max_pos_weight 5.0
 ```
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
+
+For spike detection baselines:
+```bash
+cd model_detect_peak
+
+# Autoencoder
+python autoencoder_detect.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
+  --slice_type embb --epochs 100 --sequence_length 15
+
+# Isolation Forest
+python isolation_forest_detect.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
+  --slice_type embb --sequence_length 15
+```
 
 ### Results
 During and after training, the scripts will generate evaluation metrics and save visualization plots in a `results/` folder within the respective model's directory:
