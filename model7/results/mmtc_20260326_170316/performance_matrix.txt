@@ -1,0 +1,39 @@
+========================================
+Training Parameters
+========================================
+base_path: /home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset
+train_dirs: ['tr0-26']
+test_dirs: ['tr27']
+slice_type: mmtc
+epochs: 500
+batch_size: 1024
+learning_rate: 0.0001
+sequence_length: 15
+val_split: 0.2
+lambda_detect: 1.0
+weight_decay: 0.0
+patience: 25
+max_pos_weight: 7.0
+d_model: 128
+n_heads: 4
+n_layers: 3
+dim_feedforward: 512
+vit_dropout: 0.2
+
+========================================
+Regression Metrics
+========================================
+MAE:    0.0024
+RMSE:   0.0036
+R²:     0.4031
+
+========================================
+Spike Detection Metrics
+========================================
+Accuracy:   0.7955
+Precision:  0.3534
+Recall:     0.7385
+F1 Score:   0.4780
+FP Rate:    0.1962
+FN Rate:    0.2615
+Spike Rate: 12.68%

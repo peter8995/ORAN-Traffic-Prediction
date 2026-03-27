@@ -1,0 +1,43 @@
+========================================
+Training Parameters
+========================================
+base_path: /home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset
+train_dirs: ['tr0-26']
+test_dirs: ['tr27']
+slice_type: embb
+epochs: 500
+batch_size: 1024
+learning_rate: 0.0001
+sequence_length: 15
+val_split: 0.2
+weight_decay: 0.0
+patience: 25
+d_model: 128
+n_heads: 4
+n_layers: 3
+dim_feedforward: 512
+vit_dropout: 0.2
+
+========================================
+Regression Metrics (All)
+========================================
+MAE:    0.0044
+RMSE:   0.0055
+R²:     0.9780
+
+========================================
+Regression Metrics by Region
+========================================
+Spike Rate: 11.64%
+
+Spike timesteps (N=16460):
+  MAE:  0.0034
+  RMSE: 0.0052
+  R²:   0.9743
+
+Normal timesteps (N=124921):
+  MAE:  0.0045
+  RMSE: 0.0056
+  R²:   0.9781
+
+MAE ratio (spike/normal): 0.7527

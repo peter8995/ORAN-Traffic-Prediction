@@ -13,6 +13,7 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model4/`**: Implements a dynamic Colosseum ORAN dataset model with directory range parsing.
 - **`model5/`**: Implements the SpikeAwareLSTM model for traffic prediction with dual-head spike detection.
 - **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
+- **`model7/`**: Custom Tiny ViT variant — replaces the 86M-parameter torchvision vit_b_16 with a lightweight ~0.8-2.4M parameter transformer encoder, better matching model capacity to the 15×11 time-series input scale.
 - **`model_detect_peak/`**: Spike predictability baselines using Autoencoder and Isolation Forest (unsupervised anomaly detection).
 
 ## 📊 Datasets
@@ -69,15 +70,30 @@ Built on top of Model 5, this model addresses the severe overfitting problem obs
   - `pos_weight` for `BCEWithLogitsLoss` clamped to `--max_pos_weight` (default `5.0`) to prevent extreme class imbalance from causing all-positive spike predictions.
 - **Loss**: Same composite loss as Model 5: `L = L_MSE + λ_detect × L_BCE`, with `λ_detect` default `1.0`.
 
+### Model 7: Tiny ViT SpikeAwareLSTM (`model7/`)
+Built on Model 6, this model addresses the capacity-data mismatch identified in Plan A2: the 86M-parameter `vit_b_16` is far too large for the 15×11 time-series input, wasting parameters and causing regression underestimation when trained from scratch.
+- **Architecture**: Replaces `torchvision.models.vit_b_16` with a custom `TinyViT`:
+  - `nn.Linear(11, d_model)` input projection — direct feature-to-embedding, no image convolution
+  - Learnable CLS token + positional embedding
+  - `nn.TransformerEncoder` with configurable depth (`n_layers`), width (`d_model`), heads (`n_heads`), and feedforward dimension (`dim_feedforward`)
+  - `LayerNorm` on output, Xavier/truncated normal weight initialization, GELU activation
+  - LSTM `inputSize` reduced from 768 to `d_model`
+- **Parameter Efficiency**: Default config (`d_model=128, n_heads=4, n_layers=3`) yields ~805K params (eMBB) or ~1.1M params (mMTC/uRLLC) — a **100x reduction** from the 86M vit_b_16. Alternative `d_model=256, n_layers=4` yields ~2.4M params.
+- **Training**: Same as Model 6 (early stopping, weight decay, CosineAnnealingLR, gradient clipping, pos_weight clamping). No torchvision dependency.
+- **New CLI Args**: `--d_model`, `--n_heads`, `--n_layers`, `--dim_feedforward`, `--vit_dropout`
+
 ### Spike Predictability Baselines (`model_detect_peak/`)
 Independent unsupervised/anomaly detection baselines to evaluate the inherent predictability of traffic spikes, without the full ViT+LSTM pipeline.
 - **Models**: Autoencoder (PyTorch) and Isolation Forest (scikit-learn).
 - **Input**: 17 features per timestep — 11 original O-RAN KPIs + 6 rolling temporal features (rolling mean/std/max over m=120, rolling mean/Q0.9 over L=1200, first-order difference). Sliding window of `seq_len=15` steps, flattened to a 255-dim vector.
 - **Rolling Features Rationale**: The spike ground truth is defined by long-range rolling statistics (L=1200 ~5min, m=120 ~30s), but the sliding window only covers ~3.75s. Rolling features compress long-term trends into each timestep, bridging this time-scale gap.
-- **Spike Labels**: Same adaptive threshold formula as model5/6: `τ = Q_0.9 × (1 + ψ × ξ_m / ξ_max)`, computed on raw (unscaled) target values.
+- **Spike Labels (Plan B)**: Global threshold + sudden-change condition: `spike = (target > μ + k·σ) & (|diff| > μ_diff + j·σ_diff)`. Controlled by `--k` (value threshold, default 2.0) and `--j` (diff threshold, default 2.0). This replaces the original rolling Q0.9 formula which produced ~10% fixed spike rate regardless of actual traffic patterns (see rationale below).
 - **Autoencoder**: Trains on all data, flags samples with reconstruction error above a percentile threshold (default P88) as spikes.
 - **Isolation Forest**: Unsupervised anomaly detection with configurable contamination rate (default 0.11). Includes automatic threshold sweep to find the best F1.
 - **Evaluation**: Reports Precision, Recall, F1, Accuracy, FP/FN Rate. Generates score distribution plots and spike detection timeline visualizations.
+
+#### Spike Label Evolution
+The original paper's adaptive threshold (`τ = Q_0.9 × (1 + ψ × ξ_m/ξ_max)`, ψ=0.05) was designed for the Barcelona 5G dataset which features event-driven dramatic spikes (e.g., football matches). On the Colosseum dataset, where traffic is more uniformly distributed, this formula degenerates into a local Q90 threshold — always labeling ~10% as spikes regardless of actual anomalies. Plan B addresses this by using global statistics and requiring both high absolute value AND sudden change, producing cleaner labels that better represent genuine traffic spikes.
 
 ## 🚀 Getting Started
 
@@ -126,19 +142,37 @@ python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --patience 30 \
   --max_pos_weight 5.0
 ```
+
+Model 7 adds Tiny ViT hyperparameters on top of model 6:
+```bash
+cd model7
+python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
+  --slice_type embb \
+  --epochs 200 \
+  --batch_size 1024 \
+  --learning_rate 1e-4 \
+  --sequence_length 15 \
+  --patience 20 \
+  --weight_decay 0 \
+  --d_model 128 \
+  --n_heads 4 \
+  --n_layers 3 \
+  --dim_feedforward 512 \
+  --vit_dropout 0.1
+```
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
 
 For spike detection baselines:
 ```bash
 cd model_detect_peak
 
-# Autoencoder
+# Autoencoder (Plan B spike labels, adjustable k/j)
 python autoencoder_detect.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
-  --slice_type embb --epochs 100 --sequence_length 15
+  --slice_type embb --epochs 100 --sequence_length 15 --k 2.0 --j 1.0
 
 # Isolation Forest
 python isolation_forest_detect.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
-  --slice_type embb --sequence_length 15
+  --slice_type embb --sequence_length 15 --k 2.0 --j 1.0
 ```
 
 ### Results

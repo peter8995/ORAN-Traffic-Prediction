@@ -27,6 +27,10 @@ def main():
     parser.add_argument('--max_samples', type=str, default='auto',
                         help="Number of samples per tree ('auto' or integer)")
     parser.add_argument('--random_state', type=int, default=42)
+    parser.add_argument('--k', type=float, default=2.0,
+                        help="Spike value threshold: global_mean + k*global_std")
+    parser.add_argument('--j', type=float, default=2.0,
+                        help="Spike diff threshold: diff_mean + j*diff_std")
     args = parser.parse_args()
 
     train_paths = parse_directory_args(args.train_dirs, args.base_path)
@@ -34,6 +38,8 @@ def main():
 
     # Data loading
     processor = DataProcessor(sequenceLength=args.sequence_length)
+    processor.k = args.k
+    processor.j = args.j
     train_files = processor.accumulate_files(train_paths, args.slice_type)
     if not train_files:
         raise ValueError("No metrics.csv files found in --train_dirs!")

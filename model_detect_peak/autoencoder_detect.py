@@ -58,6 +58,10 @@ def main():
     parser.add_argument('--patience', type=int, default=15, help="Early stopping patience (0 to disable)")
     parser.add_argument('--threshold_percentile', type=float, default=88,
                         help="Percentile of train reconstruction error to set as spike threshold")
+    parser.add_argument('--k', type=float, default=2.0,
+                        help="Spike value threshold: global_mean + k*global_std")
+    parser.add_argument('--j', type=float, default=2.0,
+                        help="Spike diff threshold: diff_mean + j*diff_std")
     args = parser.parse_args()
 
     train_paths = parse_directory_args(args.train_dirs, args.base_path)
@@ -65,6 +69,8 @@ def main():
 
     # Data loading
     processor = DataProcessor(sequenceLength=args.sequence_length)
+    processor.k = args.k
+    processor.j = args.j
     train_files = processor.accumulate_files(train_paths, args.slice_type)
     if not train_files:
         raise ValueError("No metrics.csv files found in --train_dirs!")

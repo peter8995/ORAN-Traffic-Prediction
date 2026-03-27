@@ -14,11 +14,17 @@ class DataProcessor:
             'tx_pkts downlink', 'rx_pkts uplink', 'ul_rssi']
         self.target = 'sum_granted_prbs'
 
-        # Spike detection parameters (same as model5/6)
-        self.L = 1200
-        self.m = 120
-        self.psi = 0.05
-        self.xi_max = 1.0
+        # Spike detection parameters
+        self.m = 120       # short-term volatility window (~1 min)
+        self.L = 1200      # long-term baseline window (~10 min)
+
+        # Plan B: global threshold + sudden-change condition
+        self.k = 2.0       # global value threshold: mean + k*std
+        self.j = 2.0       # diff threshold: mean + j*std
+        self.global_mean = 0.0
+        self.global_std = 1.0
+        self.diff_mean = 0.0
+        self.diff_std = 1.0
 
         # Rolling temporal features
         self.rolling_features = [
@@ -27,27 +33,46 @@ class DataProcessor:
         ]
 
     def fit_spike_params(self, train_files):
-        """Compute global xi_max from all training files."""
-        all_xi = []
+        """Compute global target stats and diff stats from all training files (Plan B)."""
+        all_targets = []
+        all_diffs = []
         for f in train_files:
             df = self.load_and_clean(f)
             if len(df) < 2:
                 continue
-            target_series = pd.Series(df[[self.target]].values.flatten())
-            xi_m = target_series.rolling(window=self.m, min_periods=1).std().fillna(0)
-            if xi_m.max() > 0:
-                all_xi.append(xi_m.max())
+            vals = df[self.target].values.astype(float)
+            all_targets.append(vals)
+            all_diffs.append(np.abs(np.diff(vals)))
 
-        self.xi_max = max(all_xi) if all_xi else 1.0
-        print(f"[SpikeDet] Global xi_max = {self.xi_max:.4f} from {len(all_xi)} files.")
+        all_targets = np.concatenate(all_targets)
+        all_diffs = np.concatenate(all_diffs)
+
+        self.global_mean = float(np.mean(all_targets))
+        self.global_std = float(np.std(all_targets))
+        self.diff_mean = float(np.mean(all_diffs))
+        self.diff_std = float(np.std(all_diffs))
+
+        tau_value = self.global_mean + self.k * self.global_std
+        tau_diff = self.diff_mean + self.j * self.diff_std
+
+        print(f"[SpikeDet-PlanB] global_mean={self.global_mean:.2f}, global_std={self.global_std:.2f}")
+        print(f"[SpikeDet-PlanB] value threshold (k={self.k}): {tau_value:.2f}")
+        print(f"[SpikeDet-PlanB] diff_mean={self.diff_mean:.2f}, diff_std={self.diff_std:.2f}")
+        print(f"[SpikeDet-PlanB] diff threshold (j={self.j}): {tau_diff:.2f}")
+        print(f"[SpikeDet-PlanB] Computed from {len(all_targets)} data points across {len(train_files)} files.")
 
     def calculate_spike_labels(self, target_data):
-        """Adaptive threshold spike labeling (same formula as model5/6)."""
-        target_series = pd.Series(target_data.flatten())
-        q_0_9 = target_series.rolling(window=self.L, min_periods=1).quantile(0.9)
-        xi_m = target_series.rolling(window=self.m, min_periods=1).std().fillna(0)
-        tau_spike = q_0_9 * (1 + self.psi * (xi_m / self.xi_max))
-        s_labels = (target_series > tau_spike).astype(int).values
+        """Plan B: spike = value exceeds global threshold AND sudden change."""
+        vals = target_data.flatten().astype(float)
+
+        tau_value = self.global_mean + self.k * self.global_std
+        tau_diff = self.diff_mean + self.j * self.diff_std
+
+        high_value = vals > tau_value
+        diff = np.abs(np.diff(vals, prepend=vals[0]))
+        sudden_change = diff > tau_diff
+
+        s_labels = (high_value & sudden_change).astype(int)
         return s_labels
 
     def load_and_clean(self, file_path):
