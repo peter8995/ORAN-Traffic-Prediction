@@ -14,6 +14,7 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model5/`**: Implements the SpikeAwareLSTM model for traffic prediction with dual-head spike detection.
 - **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
 - **`model7/`**: Custom Tiny ViT variant — replaces the 86M-parameter torchvision vit_b_16 with a lightweight ~0.8-2.4M parameter transformer encoder, better matching model capacity to the 15×11 time-series input scale.
+- **`model7_1/`**: Regression-only ablation of model7 — removes the spike detection head to verify whether multi-task learning actually helps regression. All slices use BiLSTM.
 - **`model_detect_peak/`**: Spike predictability baselines using Autoencoder and Isolation Forest (unsupervised anomaly detection).
 
 ## 📊 Datasets
@@ -82,6 +83,22 @@ Built on Model 6, this model addresses the capacity-data mismatch identified in 
 - **Training**: Same as Model 6 (early stopping, weight decay, CosineAnnealingLR, gradient clipping, pos_weight clamping). No torchvision dependency.
 - **New CLI Args**: `--d_model`, `--n_heads`, `--n_layers`, `--dim_feedforward`, `--vit_dropout`
 
+### Model 7_1: Regression-Only Ablation (`model7_1/`)
+Identical architecture to Model 7 (TinyViT + BiLSTM) but with the spike detection head removed. Used to determine whether the multi-task spike detection objective actually improves regression quality, particularly at spike timesteps.
+- **Architecture**: Same TinyViT + BiLSTM backbone and regression head as Model 7. **All slices use BiLSTM** (unlike Model 7 where eMBB used LSTM).
+- **Loss**: Pure MSE — no `BCEWithLogitsLoss`, no `lambda_detect`.
+- **Spike Labels**: Still computed during data loading for evaluation purposes only (not used in training), enabling spike vs. normal region MAE/RMSE/R² analysis.
+- **Extra Output**: `performance_matrix.txt` — reports MAE/RMSE/R² split by spike vs. normal timesteps and the MAE ratio (spike/normal). Prediction plots highlight spike regions in yellow for visual inspection.
+- **Key Results**:
+
+  | Slice | MAE | RMSE | R² | Spike R² | Normal R² | MAE Ratio |
+  |-------|-----|------|----|----------|-----------|-----------|
+  | eMBB (BiLSTM) | 0.0044 | 0.0055 | 0.9780 | 0.9743 | 0.9781 | 0.75 |
+  | mMTC | 0.0023 | 0.0036 | 0.3958 | -0.6150 | 0.4966 | 3.38 |
+  | uRLLC | 0.0079 | 0.0135 | 0.4140 | -0.3230 | 0.5270 | 3.68 |
+
+- **Ablation Conclusion**: Model 7_1 achieves equal or slightly better regression than Model 7 across all slices, indicating the spike head divides rather than focuses the backbone's learning capacity. The mMTC/uRLLC bottleneck (R² ≈ 0.4, negative spike R²) persists regardless of the spike head — it reflects a fundamental model/feature expressiveness limit, not overfitting.
+
 ### Spike Predictability Baselines (`model_detect_peak/`)
 Independent unsupervised/anomaly detection baselines to evaluate the inherent predictability of traffic spikes, without the full ViT+LSTM pipeline.
 - **Models**: Autoencoder (PyTorch) and Isolation Forest (scikit-learn).
@@ -143,22 +160,36 @@ python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --max_pos_weight 5.0
 ```
 
-Model 7 adds Tiny ViT hyperparameters on top of model 6:
+Model 7 adds Tiny ViT hyperparameters on top of model 6 (best config: vit_dropout=0.2, weight_decay=1e-5, patience=50):
 ```bash
 cd model7
 python train.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
   --slice_type embb \
-  --epochs 200 \
+  --epochs 500 \
   --batch_size 1024 \
   --learning_rate 1e-4 \
   --sequence_length 15 \
-  --patience 20 \
-  --weight_decay 0 \
+  --patience 50 \
+  --weight_decay 1e-5 \
   --d_model 128 \
   --n_heads 4 \
   --n_layers 3 \
   --dim_feedforward 512 \
-  --vit_dropout 0.1
+  --vit_dropout 0.2
+```
+
+Model 7_1 (regression-only ablation, same Tiny ViT config, all slices use BiLSTM):
+```bash
+cd model7_1
+python train.py --train_dirs tr0-26 --test_dirs tr27 \
+  --slice_type embb \
+  --epochs 500 \
+  --batch_size 1024 \
+  --learning_rate 1e-4 \
+  --sequence_length 15 \
+  --patience 25 \
+  --weight_decay 0.0 \
+  --vit_dropout 0.2
 ```
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
 

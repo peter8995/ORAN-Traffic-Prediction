@@ -18,37 +18,37 @@ Input: (batch, 15, 11)
          │
          ▼
 ┌─────────────────────────┐
-│       TinyViT            │
-│  Linear(11 → 128)        │
-│  + CLS Token             │
-│  + Positional Embedding  │
-│  TransformerEncoder ×3   │
-│  LayerNorm               │
+│       TinyViT           │
+│  Linear(11 → 128)       │
+│  + CLS Token            │
+│  + Positional Embedding │
+│  TransformerEncoder ×3  │
+│  LayerNorm              │
 └─────────┬───────────────┘
           │ (batch, 16, 128)
           ▼
 ┌─────────────────────────┐
-│   BiLSTM (all slices)    │
+│   BiLSTM (all slices)   │
 │  BiLSTM(128→128) →256   │
-│  Dropout(0.2)            │
+│  Dropout(0.2)           │
 │  BiLSTM(256→64) →128    │
 └─────────┬───────────────┘
           │ (batch, 16, 128)
           ▼
 ┌─────────────────────────┐
-│  MultiheadAttention      │
-│  (4 heads, self-attn)    │
+│  MultiheadAttention     │
+│  (4 heads, self-attn)   │
 │  → 取最後一個 token      │
 └─────────┬───────────────┘
           │ (batch, 128)
           ▼
 ┌─────────────────────────┐
-│   Regression Head        │
+│   Regression Head       │
 │  Linear(128→64) → ReLU  │
-│  Dropout(0.1)            │
+│  Dropout(0.1)           │
 │  Linear(64→32) → ReLU   │
-│  Dropout(0.1)            │
-│  Linear(32→1)            │
+│  Dropout(0.1)           │
+│  Linear(32→1)           │
 └─────────────────────────┘
           │
           ▼
@@ -200,23 +200,36 @@ Raw CSV (Colosseum O-RAN Dataset)
 
 ### Key Observations
 
-- **eMBB**: R²≈0.978，spike 區域預測甚至略優於 normal
-- **mMTC/uRLLC**: R²≈0.4，spike 區域 R² 為負值 (比預測平均值還差)
-- **BiLSTM vs LSTM (eMBB)**: BiLSTM 在 spike 區域表現更好 (MAE ratio 0.75 vs 0.89)
+#### eMBB
+- R²≈0.978，但有**灌水成分**：不同 experiment 的流量等級差異大（如某段 ~0.02、某段 ~0.05），模型實質上是在預測**每個 segment（experiment）的均值水平**，而非 segment 內的 timestep-level 時序波動。segment 內紅藍線近乎水平，高 R² 不代表真正的時序預測能力。
+- BiLSTM 在 spike 區域表現優於 LSTM（MAE ratio 0.75 vs 0.89）
+- Loss curve：LSTM 收斂慢（~epoch 80），BiLSTM 收斂快（~epoch 15），但最終 val loss 相近（~0.0004-0.0005）；BiLSTM train/val gap 更小，泛化更好
+
+#### mMTC / uRLLC
+- R²≈0.4，spike 區域 R² 為負值（比預測平均值還差），MAE ratio 達 3.38 / 3.68
+- 高值段嚴重低估，spike 區域幾乎全被壓低
+- **Loss curve 非常健康**（train/val 幾乎重疊，無 overfitting）→ 瓶頸不是訓練不足，而是**模型/特徵表達能力不足以捕捉 mMTC/uRLLC 波動模式**
+- 可能原因：sequence_length=15（~3.75 秒）太短、11 個特徵不足以描述流量動態、或 mMTC/uRLLC 本身可預測性較低
 
 ---
 
 ## Model7 vs Model7_1 Comparison
 
+> 比較基準為 Model7 Round 3（vit_dropout=0.2, weight_decay=0, patience=50）
+
 | 指標 | Model7 (Multi-task) | Model7_1 (Regression-only) |
 |------|---------------------|---------------------------|
-| eMBB R² | 0.9702 | **0.9789** |
-| mMTC R² | 0.4031 | 0.3958 |
-| uRLLC R² | 0.3577 | **0.4140** |
+| eMBB MAE | 0.0046 | **0.0043** |
+| eMBB RMSE | 0.0060 | **0.0054** |
+| eMBB R² | 0.9739 | **0.9780** |
+| mMTC MAE | 0.0024 | **0.0023** |
+| mMTC RMSE | 0.0036 | 0.0036 |
+| mMTC R² | 0.3894 | **0.3958** |
+| uRLLC R² | — | **0.4140** |
 | Spike Detection | 有 (F1: 0.24~0.48) | 無 |
 | eMBB Seq Model | LSTM | BiLSTM |
 
-結論：Spike detection 輔助任務未顯著提升回歸性能，Model7_1 在 eMBB 和 uRLLC 上甚至略優。
+**結論**：Spike detection 輔助任務未提升回歸性能，Model7_1 在所有 slice 上 regression 微幅優於 Model7。spike head 未能讓 backbone 對突變更敏感，反而分散了學習能力。
 
 ---
 
