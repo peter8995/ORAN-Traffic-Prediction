@@ -1,0 +1,65 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "urllc",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 500,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 0,
+  "seed": 42,
+  "rnn_type": "bilstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.05,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": true,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/urllc_20260414_173421"
+}
+[INFO] Device: cuda
+[INFO] Slice=urllc | train_csv=1896 | test_csv=67
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1517 val=379
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0902
+  - tx_brate: 0.8815
+  - rx_brate: 0.2698
+  - ul_sinr: 0.2542
+  - dl_mcs: 0.8812
+  - ul_mcs: 0.2542
+  - phr: 0.2505
+  - tx_pkts: 0.8815
+  - rx_pkts: 0.3007
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1798
+  - dl_n_samples: 0.8815
+  - ul_n_samples: 0.3007
+[INFO] Windows | train=3068069 val=774066 test=137173
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.050000, effective=0.050000, target_iqr=104.000000, multiplier=1.000000, scale_aware=off
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[Epoch 001] train=3.568646 (main=3.528214, smooth=0.808634) | val=1.560617 (main=1.520643, smooth=0.799494) | lr=9.999901e-05 | time=87.33s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=3.099807 (main=3.059502, smooth=0.806113) | val=1.314703 (main=1.274871, smooth=0.796624) | lr=9.999605e-05 | time=105.92s
+[INFO] Saved new best checkpoint at epoch 2.

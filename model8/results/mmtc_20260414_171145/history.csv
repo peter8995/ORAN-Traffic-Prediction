@@ -1,0 +1,2 @@
+epoch,train_total_loss,train_main_loss,train_smooth_loss,val_total_loss,val_main_loss,val_smooth_loss,lr,epoch_time_sec
+1,14.99712402962793,14.953660753078397,0.869265258184349,4.706854238386876,4.663173437771645,0.8736150696421744,0.0,46.01326298713684

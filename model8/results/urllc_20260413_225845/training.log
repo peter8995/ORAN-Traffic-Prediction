@@ -1,0 +1,566 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "urllc",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 500,
+  "learning_rate": 0.001,
+  "weight_decay": 0.0,
+  "scheduler": "none",
+  "patience": 500,
+  "seed": 42,
+  "rnn_type": "bilstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.1,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/urllc_20260413_225845"
+}
+[INFO] Device: cuda
+[INFO] Slice=urllc | train_csv=1896 | test_csv=67
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1517 val=379
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0902
+  - ul_buffer: 0.0038
+  - tx_brate: 0.8815
+  - rx_brate: 0.2698
+  - ul_sinr: 0.2542
+  - dl_mcs: 0.8812
+  - ul_mcs: 0.2542
+  - phr: 0.2505
+  - tx_pkts: 0.8815
+  - rx_pkts: 0.3007
+  - ul_rssi: 0.0000
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1798
+  - dl_n_samples: 0.8815
+  - ul_n_samples: 0.3007
+[INFO] Windows | train=3068069 val=774066 test=137173
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[Epoch 001] train=3.767078 (main=3.686215, smooth=0.808637) | val=1.470654 (main=1.391931, smooth=0.787229) | lr=1.000000e-03 | time=91.04s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=3.320472 (main=3.239923, smooth=0.805495) | val=1.531446 (main=1.451647, smooth=0.797984) | lr=1.000000e-03 | time=90.52s
+[Epoch 003] train=3.378722 (main=3.297980, smooth=0.807422) | val=1.384713 (main=1.304800, smooth=0.799128) | lr=1.000000e-03 | time=94.29s
+[INFO] Saved new best checkpoint at epoch 3.
+[Epoch 004] train=3.233381 (main=3.152376, smooth=0.810053) | val=1.421542 (main=1.342827, smooth=0.787151) | lr=1.000000e-03 | time=100.38s
+[Epoch 005] train=3.288200 (main=3.207668, smooth=0.805324) | val=1.420079 (main=1.341110, smooth=0.789688) | lr=1.000000e-03 | time=113.15s
+[Epoch 006] train=3.287794 (main=3.206774, smooth=0.810203) | val=2.000403 (main=1.920619, smooth=0.797834) | lr=1.000000e-03 | time=100.18s
+[Epoch 007] train=3.389046 (main=3.307909, smooth=0.811368) | val=1.515964 (main=1.436149, smooth=0.798147) | lr=1.000000e-03 | time=93.51s
+[Epoch 008] train=3.374306 (main=3.293455, smooth=0.808509) | val=2.241089 (main=2.161677, smooth=0.794121) | lr=1.000000e-03 | time=98.26s
+[Epoch 009] train=3.247774 (main=3.166763, smooth=0.810111) | val=1.394983 (main=1.315972, smooth=0.790113) | lr=1.000000e-03 | time=98.11s
+[Epoch 010] train=3.225272 (main=3.144197, smooth=0.810753) | val=1.573013 (main=1.493447, smooth=0.795668) | lr=1.000000e-03 | time=97.62s
+[Epoch 011] train=3.252421 (main=3.171213, smooth=0.812084) | val=1.615467 (main=1.536480, smooth=0.789866) | lr=1.000000e-03 | time=93.35s
+[Epoch 012] train=3.239385 (main=3.158361, smooth=0.810248) | val=1.653431 (main=1.574272, smooth=0.791590) | lr=1.000000e-03 | time=100.18s
+[Epoch 013] train=3.248117 (main=3.166883, smooth=0.812340) | val=1.792710 (main=1.713630, smooth=0.790806) | lr=1.000000e-03 | time=96.93s
+[Epoch 014] train=3.303510 (main=3.222221, smooth=0.812890) | val=1.635404 (main=1.556305, smooth=0.790994) | lr=1.000000e-03 | time=98.24s
+[Epoch 015] train=3.209944 (main=3.128554, smooth=0.813902) | val=1.376950 (main=1.297807, smooth=0.791434) | lr=1.000000e-03 | time=99.12s
+[INFO] Saved new best checkpoint at epoch 15.
+[Epoch 016] train=3.235215 (main=3.153920, smooth=0.812953) | val=1.745791 (main=1.665903, smooth=0.798881) | lr=1.000000e-03 | time=99.64s
+[Epoch 017] train=3.255558 (main=3.174217, smooth=0.813414) | val=1.418781 (main=1.339558, smooth=0.792235) | lr=1.000000e-03 | time=98.87s
+[Epoch 018] train=3.270542 (main=3.189187, smooth=0.813547) | val=1.677976 (main=1.598904, smooth=0.790721) | lr=1.000000e-03 | time=93.38s
+[Epoch 019] train=3.265542 (main=3.184166, smooth=0.813762) | val=1.413684 (main=1.334146, smooth=0.795388) | lr=1.000000e-03 | time=93.33s
+[Epoch 020] train=3.247373 (main=3.166126, smooth=0.812472) | val=1.685953 (main=1.606810, smooth=0.791433) | lr=1.000000e-03 | time=97.11s
+[Epoch 021] train=3.211506 (main=3.130190, smooth=0.813159) | val=1.832872 (main=1.753958, smooth=0.789136) | lr=1.000000e-03 | time=93.91s
+[Epoch 022] train=3.219261 (main=3.138184, smooth=0.810767) | val=1.471260 (main=1.391965, smooth=0.792948) | lr=1.000000e-03 | time=93.51s
+[Epoch 023] train=3.171996 (main=3.090588, smooth=0.814076) | val=1.576110 (main=1.497138, smooth=0.789726) | lr=1.000000e-03 | time=101.77s
+[Epoch 024] train=3.201364 (main=3.119840, smooth=0.815233) | val=1.438076 (main=1.358446, smooth=0.796300) | lr=1.000000e-03 | time=99.09s
+[Epoch 025] train=3.211840 (main=3.130358, smooth=0.814821) | val=1.572216 (main=1.493057, smooth=0.791584) | lr=1.000000e-03 | time=97.74s
+[Epoch 026] train=3.141551 (main=3.060060, smooth=0.814901) | val=3.512527 (main=3.433038, smooth=0.794883) | lr=1.000000e-03 | time=101.33s
+[Epoch 027] train=3.241404 (main=3.159769, smooth=0.816348) | val=1.690273 (main=1.611344, smooth=0.789293) | lr=1.000000e-03 | time=100.43s
+[Epoch 028] train=3.216440 (main=3.135040, smooth=0.814003) | val=1.461203 (main=1.381915, smooth=0.792879) | lr=1.000000e-03 | time=95.15s
+[Epoch 029] train=3.162067 (main=3.080570, smooth=0.814966) | val=3.050035 (main=2.970817, smooth=0.792174) | lr=1.000000e-03 | time=96.86s
+[Epoch 030] train=3.217650 (main=3.135842, smooth=0.818085) | val=1.413605 (main=1.334249, smooth=0.793562) | lr=1.000000e-03 | time=98.68s
+[Epoch 031] train=3.221003 (main=3.139160, smooth=0.818428) | val=1.929752 (main=1.850585, smooth=0.791661) | lr=1.000000e-03 | time=97.69s
+[Epoch 032] train=3.208399 (main=3.126643, smooth=0.817560) | val=1.543889 (main=1.464779, smooth=0.791098) | lr=1.000000e-03 | time=95.73s
+[Epoch 033] train=3.195965 (main=3.114250, smooth=0.817153) | val=1.449833 (main=1.370719, smooth=0.791146) | lr=1.000000e-03 | time=102.21s
+[Epoch 034] train=3.186626 (main=3.104996, smooth=0.816300) | val=1.659406 (main=1.580284, smooth=0.791214) | lr=1.000000e-03 | time=99.97s
+[Epoch 035] train=3.166663 (main=3.085049, smooth=0.816143) | val=1.598380 (main=1.519370, smooth=0.790099) | lr=1.000000e-03 | time=95.49s
+[Epoch 036] train=3.171209 (main=3.089361, smooth=0.818480) | val=1.476643 (main=1.397749, smooth=0.788939) | lr=1.000000e-03 | time=95.98s
+[Epoch 037] train=3.223563 (main=3.141565, smooth=0.819984) | val=1.678859 (main=1.599833, smooth=0.790264) | lr=1.000000e-03 | time=98.03s
+[Epoch 038] train=3.210108 (main=3.127987, smooth=0.821203) | val=1.464104 (main=1.384489, smooth=0.796144) | lr=1.000000e-03 | time=96.57s
+[Epoch 039] train=3.310643 (main=3.228303, smooth=0.823396) | val=1.487730 (main=1.408394, smooth=0.793355) | lr=1.000000e-03 | time=97.27s
+[Epoch 040] train=3.245975 (main=3.163425, smooth=0.825500) | val=1.709404 (main=1.630074, smooth=0.793301) | lr=1.000000e-03 | time=100.29s
+[Epoch 041] train=3.233070 (main=3.150684, smooth=0.823866) | val=1.988150 (main=1.909059, smooth=0.790910) | lr=1.000000e-03 | time=96.51s
+[Epoch 042] train=3.277772 (main=3.195423, smooth=0.823495) | val=2.159226 (main=2.080292, smooth=0.789334) | lr=1.000000e-03 | time=98.40s
+[Epoch 043] train=3.215000 (main=3.132836, smooth=0.821645) | val=1.627163 (main=1.548115, smooth=0.790473) | lr=1.000000e-03 | time=96.36s
+[Epoch 044] train=3.218260 (main=3.136365, smooth=0.818953) | val=1.469221 (main=1.390167, smooth=0.790538) | lr=1.000000e-03 | time=99.46s
+[Epoch 045] train=3.127716 (main=3.046062, smooth=0.816539) | val=2.092007 (main=2.012874, smooth=0.791331) | lr=1.000000e-03 | time=100.28s
+[Epoch 046] train=3.268782 (main=3.186920, smooth=0.818615) | val=1.463077 (main=1.384153, smooth=0.789242) | lr=1.000000e-03 | time=95.82s
+[Epoch 047] train=3.198382 (main=3.116673, smooth=0.817090) | val=1.605852 (main=1.526992, smooth=0.788598) | lr=1.000000e-03 | time=98.50s
+[Epoch 048] train=3.191024 (main=3.109288, smooth=0.817367) | val=1.425732 (main=1.346394, smooth=0.793384) | lr=1.000000e-03 | time=97.79s
+[Epoch 049] train=3.200927 (main=3.119037, smooth=0.818903) | val=1.416713 (main=1.337925, smooth=0.787879) | lr=1.000000e-03 | time=98.01s
+[Epoch 050] train=3.306429 (main=3.224552, smooth=0.818770) | val=1.530190 (main=1.450961, smooth=0.792295) | lr=1.000000e-03 | time=95.29s
+[Epoch 051] train=3.211665 (main=3.129829, smooth=0.818363) | val=1.446835 (main=1.367757, smooth=0.790783) | lr=1.000000e-03 | time=101.62s
+[Epoch 052] train=3.216389 (main=3.134566, smooth=0.818225) | val=1.438182 (main=1.359109, smooth=0.790723) | lr=1.000000e-03 | time=101.02s
+[Epoch 053] train=3.225445 (main=3.143545, smooth=0.819000) | val=1.536743 (main=1.457612, smooth=0.791317) | lr=1.000000e-03 | time=100.45s
+[Epoch 054] train=3.143976 (main=3.062223, smooth=0.817527) | val=1.456120 (main=1.376991, smooth=0.791284) | lr=1.000000e-03 | time=96.04s
+[Epoch 055] train=3.170636 (main=3.088978, smooth=0.816573) | val=1.674054 (main=1.594550, smooth=0.795035) | lr=1.000000e-03 | time=97.88s
+[Epoch 056] train=3.210182 (main=3.128438, smooth=0.817433) | val=1.538714 (main=1.459435, smooth=0.792790) | lr=1.000000e-03 | time=104.10s
+[Epoch 057] train=3.190820 (main=3.108999, smooth=0.818214) | val=1.661775 (main=1.582139, smooth=0.796357) | lr=1.000000e-03 | time=104.93s
+[Epoch 058] train=3.204984 (main=3.123142, smooth=0.818417) | val=1.499072 (main=1.419918, smooth=0.791541) | lr=1.000000e-03 | time=97.90s
+[Epoch 059] train=3.202681 (main=3.120911, smooth=0.817698) | val=1.499310 (main=1.419905, smooth=0.794053) | lr=1.000000e-03 | time=106.13s
+[Epoch 060] train=3.205931 (main=3.123955, smooth=0.819755) | val=1.449013 (main=1.369622, smooth=0.793903) | lr=1.000000e-03 | time=95.98s
+[Epoch 061] train=3.189288 (main=3.107237, smooth=0.820514) | val=1.456942 (main=1.377420, smooth=0.795214) | lr=1.000000e-03 | time=101.61s
+[Epoch 062] train=3.157613 (main=3.075525, smooth=0.820882) | val=1.505532 (main=1.426368, smooth=0.791632) | lr=1.000000e-03 | time=105.40s
+[Epoch 063] train=3.199791 (main=3.117781, smooth=0.820101) | val=1.519388 (main=1.440272, smooth=0.791159) | lr=1.000000e-03 | time=96.21s
+[Epoch 064] train=3.196796 (main=3.114729, smooth=0.820677) | val=1.543839 (main=1.464848, smooth=0.789910) | lr=1.000000e-03 | time=98.12s
+[Epoch 065] train=3.184207 (main=3.102109, smooth=0.820979) | val=1.758335 (main=1.678629, smooth=0.797066) | lr=1.000000e-03 | time=101.11s
+[Epoch 066] train=3.206103 (main=3.124129, smooth=0.819741) | val=1.737756 (main=1.658342, smooth=0.794140) | lr=1.000000e-03 | time=107.39s
+[Epoch 067] train=3.278831 (main=3.196666, smooth=0.821653) | val=1.652885 (main=1.572783, smooth=0.801019) | lr=1.000000e-03 | time=97.91s
+[Epoch 068] train=3.205125 (main=3.123336, smooth=0.817888) | val=1.587182 (main=1.507588, smooth=0.795938) | lr=1.000000e-03 | time=99.18s
+[Epoch 069] train=3.207509 (main=3.125947, smooth=0.815622) | val=1.488442 (main=1.409294, smooth=0.791480) | lr=1.000000e-03 | time=103.14s
+[Epoch 070] train=3.159232 (main=3.077751, smooth=0.814813) | val=1.708660 (main=1.629549, smooth=0.791115) | lr=1.000000e-03 | time=97.96s
+[Epoch 071] train=3.199516 (main=3.117877, smooth=0.816388) | val=1.600334 (main=1.520544, smooth=0.797905) | lr=1.000000e-03 | time=96.99s
+[Epoch 072] train=3.208600 (main=3.126900, smooth=0.817004) | val=1.678900 (main=1.598806, smooth=0.800934) | lr=1.000000e-03 | time=102.74s
+[Epoch 073] train=3.196047 (main=3.114491, smooth=0.815568) | val=1.435661 (main=1.356265, smooth=0.793955) | lr=1.000000e-03 | time=100.50s
+[Epoch 074] train=3.213764 (main=3.132272, smooth=0.814920) | val=1.464911 (main=1.385677, smooth=0.792331) | lr=1.000000e-03 | time=95.29s
+[Epoch 075] train=3.222126 (main=3.140856, smooth=0.812704) | val=1.695835 (main=1.616252, smooth=0.795830) | lr=1.000000e-03 | time=100.27s
+[Epoch 076] train=3.209635 (main=3.128420, smooth=0.812148) | val=1.581610 (main=1.502210, smooth=0.793999) | lr=1.000000e-03 | time=95.79s
+[Epoch 077] train=3.218670 (main=3.137446, smooth=0.812240) | val=2.091982 (main=2.012701, smooth=0.792808) | lr=1.000000e-03 | time=96.01s
+[Epoch 078] train=3.247101 (main=3.165652, smooth=0.814485) | val=1.438214 (main=1.358768, smooth=0.794456) | lr=1.000000e-03 | time=96.37s
+[Epoch 079] train=3.159387 (main=3.077958, smooth=0.814297) | val=1.673240 (main=1.593726, smooth=0.795146) | lr=1.000000e-03 | time=97.59s
+[Epoch 080] train=3.258518 (main=3.177172, smooth=0.813455) | val=1.492770 (main=1.413353, smooth=0.794168) | lr=1.000000e-03 | time=96.91s
+[Epoch 081] train=3.240296 (main=3.159011, smooth=0.812855) | val=1.630109 (main=1.550750, smooth=0.793595) | lr=1.000000e-03 | time=98.09s
+[Epoch 082] train=3.200290 (main=3.118792, smooth=0.814978) | val=1.515489 (main=1.435848, smooth=0.796418) | lr=1.000000e-03 | time=96.33s
+[Epoch 083] train=3.186462 (main=3.104598, smooth=0.818646) | val=1.772917 (main=1.692723, smooth=0.801946) | lr=1.000000e-03 | time=99.01s
+[Epoch 084] train=3.236618 (main=3.153992, smooth=0.826261) | val=1.545008 (main=1.465070, smooth=0.799384) | lr=1.000000e-03 | time=100.55s
+[Epoch 085] train=3.247328 (main=3.165258, smooth=0.820699) | val=1.820525 (main=1.741178, smooth=0.793467) | lr=1.000000e-03 | time=105.99s
+[Epoch 086] train=3.224692 (main=3.142784, smooth=0.819085) | val=1.720634 (main=1.641399, smooth=0.792355) | lr=1.000000e-03 | time=100.39s
+[Epoch 087] train=3.223323 (main=3.141395, smooth=0.819283) | val=1.766035 (main=1.686681, smooth=0.793536) | lr=1.000000e-03 | time=102.23s
+[Epoch 088] train=3.168961 (main=3.086447, smooth=0.825137) | val=1.490479 (main=1.410249, smooth=0.802298) | lr=1.000000e-03 | time=103.75s
+[Epoch 089] train=3.204102 (main=3.121704, smooth=0.823976) | val=1.459723 (main=1.380034, smooth=0.796895) | lr=1.000000e-03 | time=98.54s
+[Epoch 090] train=3.210763 (main=3.128955, smooth=0.818072) | val=1.618112 (main=1.538977, smooth=0.791344) | lr=1.000000e-03 | time=100.98s
+[Epoch 091] train=3.195120 (main=3.113432, smooth=0.816875) | val=1.551203 (main=1.472008, smooth=0.791954) | lr=1.000000e-03 | time=100.19s
+[Epoch 092] train=3.207465 (main=3.125830, smooth=0.816346) | val=1.550500 (main=1.471146, smooth=0.793541) | lr=1.000000e-03 | time=100.61s
+[Epoch 093] train=3.171565 (main=3.090136, smooth=0.814294) | val=1.534181 (main=1.455260, smooth=0.789207) | lr=1.000000e-03 | time=98.94s
+[Epoch 094] train=3.187048 (main=3.105592, smooth=0.814555) | val=1.502641 (main=1.423585, smooth=0.790568) | lr=1.000000e-03 | time=100.78s
+[Epoch 095] train=3.188169 (main=3.106688, smooth=0.814814) | val=1.538975 (main=1.460077, smooth=0.788977) | lr=1.000000e-03 | time=98.17s
+[Epoch 096] train=3.158940 (main=3.077591, smooth=0.813493) | val=1.840338 (main=1.761437, smooth=0.789011) | lr=1.000000e-03 | time=98.27s
+[Epoch 097] train=3.186692 (main=3.105309, smooth=0.813830) | val=1.506243 (main=1.426982, smooth=0.792617) | lr=1.000000e-03 | time=102.97s
+[Epoch 098] train=3.216998 (main=3.135575, smooth=0.814229) | val=1.517221 (main=1.437920, smooth=0.793006) | lr=1.000000e-03 | time=102.36s
+[Epoch 099] train=3.179680 (main=3.098201, smooth=0.814791) | val=1.609245 (main=1.530317, smooth=0.789272) | lr=1.000000e-03 | time=104.62s
+[Epoch 100] train=3.162239 (main=3.080761, smooth=0.814786) | val=1.456750 (main=1.377931, smooth=0.788187) | lr=1.000000e-03 | time=96.23s
+[Epoch 101] train=3.211205 (main=3.129731, smooth=0.814747) | val=1.527248 (main=1.448378, smooth=0.788697) | lr=1.000000e-03 | time=98.07s
+[Epoch 102] train=3.154307 (main=3.072621, smooth=0.816858) | val=1.453672 (main=1.374881, smooth=0.787907) | lr=1.000000e-03 | time=101.23s
+[Epoch 103] train=3.173658 (main=3.092274, smooth=0.813837) | val=1.693563 (main=1.614713, smooth=0.788499) | lr=1.000000e-03 | time=100.57s
+[Epoch 104] train=3.190332 (main=3.108893, smooth=0.814387) | val=1.637667 (main=1.558862, smooth=0.788052) | lr=1.000000e-03 | time=99.28s
+[Epoch 105] train=3.180490 (main=3.099167, smooth=0.813237) | val=1.695317 (main=1.616233, smooth=0.790831) | lr=1.000000e-03 | time=102.66s
+[Epoch 106] train=3.172120 (main=3.090818, smooth=0.813015) | val=1.462809 (main=1.383898, smooth=0.789114) | lr=1.000000e-03 | time=100.86s
+[Epoch 107] train=3.179575 (main=3.098322, smooth=0.812526) | val=1.559607 (main=1.480818, smooth=0.787883) | lr=1.000000e-03 | time=102.29s
+[Epoch 108] train=3.176638 (main=3.095363, smooth=0.812748) | val=1.525354 (main=1.446612, smooth=0.787416) | lr=1.000000e-03 | time=100.44s
+[Epoch 109] train=3.172242 (main=3.091033, smooth=0.812097) | val=1.539559 (main=1.460467, smooth=0.790926) | lr=1.000000e-03 | time=101.46s
+[Epoch 110] train=3.183295 (main=3.102034, smooth=0.812610) | val=1.593662 (main=1.514566, smooth=0.790961) | lr=1.000000e-03 | time=100.83s
+[Epoch 111] train=3.180951 (main=3.099585, smooth=0.813657) | val=1.669277 (main=1.590229, smooth=0.790481) | lr=1.000000e-03 | time=104.96s
+[Epoch 112] train=3.146463 (main=3.065000, smooth=0.814629) | val=1.452885 (main=1.373755, smooth=0.791301) | lr=1.000000e-03 | time=98.38s
+[Epoch 113] train=3.151542 (main=3.070192, smooth=0.813499) | val=1.760981 (main=1.681694, smooth=0.792873) | lr=1.000000e-03 | time=100.56s
+[Epoch 114] train=3.186511 (main=3.105150, smooth=0.813613) | val=1.573689 (main=1.494735, smooth=0.789538) | lr=1.000000e-03 | time=101.80s
+[Epoch 115] train=3.176592 (main=3.095260, smooth=0.813330) | val=1.781439 (main=1.702366, smooth=0.790733) | lr=1.000000e-03 | time=103.35s
+[Epoch 116] train=3.169806 (main=3.088459, smooth=0.813473) | val=1.632838 (main=1.553547, smooth=0.792906) | lr=1.000000e-03 | time=100.65s
+[Epoch 117] train=3.182603 (main=3.101333, smooth=0.812698) | val=1.577572 (main=1.498269, smooth=0.793035) | lr=1.000000e-03 | time=107.29s
+[Epoch 118] train=3.190554 (main=3.108984, smooth=0.815707) | val=1.642713 (main=1.563222, smooth=0.794901) | lr=1.000000e-03 | time=101.31s
+[Epoch 119] train=3.177313 (main=3.095779, smooth=0.815335) | val=1.627898 (main=1.548578, smooth=0.793195) | lr=1.000000e-03 | time=105.39s
+[Epoch 120] train=3.171765 (main=3.090085, smooth=0.816798) | val=1.783142 (main=1.703382, smooth=0.797590) | lr=1.000000e-03 | time=99.69s
+[Epoch 121] train=3.178950 (main=3.096883, smooth=0.820678) | val=1.759337 (main=1.679557, smooth=0.797809) | lr=1.000000e-03 | time=104.87s
+[Epoch 122] train=3.188749 (main=3.107198, smooth=0.815510) | val=1.643610 (main=1.564634, smooth=0.789760) | lr=1.000000e-03 | time=101.43s
+[Epoch 123] train=3.172516 (main=3.091008, smooth=0.815080) | val=1.454964 (main=1.375731, smooth=0.792332) | lr=1.000000e-03 | time=102.28s
+[Epoch 124] train=3.163693 (main=3.082395, smooth=0.812984) | val=1.463673 (main=1.384583, smooth=0.790907) | lr=1.000000e-03 | time=105.44s
+[Epoch 125] train=3.169450 (main=3.088176, smooth=0.812743) | val=1.487489 (main=1.407942, smooth=0.795470) | lr=1.000000e-03 | time=102.68s
+[Epoch 126] train=3.156074 (main=3.074882, smooth=0.811912) | val=1.511279 (main=1.432208, smooth=0.790716) | lr=1.000000e-03 | time=94.44s
+[Epoch 127] train=3.163021 (main=3.081757, smooth=0.812650) | val=1.597220 (main=1.518374, smooth=0.788468) | lr=1.000000e-03 | time=104.70s
+[Epoch 128] train=3.169224 (main=3.087579, smooth=0.816451) | val=1.671340 (main=1.591867, smooth=0.794727) | lr=1.000000e-03 | time=127.79s
+[Epoch 129] train=3.177324 (main=3.095614, smooth=0.817097) | val=1.609045 (main=1.530058, smooth=0.789868) | lr=1.000000e-03 | time=131.20s
+[Epoch 130] train=3.174558 (main=3.093008, smooth=0.815496) | val=1.731234 (main=1.652140, smooth=0.790936) | lr=1.000000e-03 | time=122.97s
+[Epoch 131] train=3.169084 (main=3.087587, smooth=0.814974) | val=1.531448 (main=1.452137, smooth=0.793111) | lr=1.000000e-03 | time=115.15s
+[Epoch 132] train=3.180346 (main=3.098937, smooth=0.814091) | val=1.519327 (main=1.440003, smooth=0.793238) | lr=1.000000e-03 | time=118.26s
+[Epoch 133] train=3.174285 (main=3.092842, smooth=0.814429) | val=1.535403 (main=1.455761, smooth=0.796419) | lr=1.000000e-03 | time=120.98s
+[Epoch 134] train=3.167189 (main=3.085797, smooth=0.813925) | val=1.496492 (main=1.416706, smooth=0.797864) | lr=1.000000e-03 | time=113.13s
+[Epoch 135] train=3.215162 (main=3.133675, smooth=0.814869) | val=1.891229 (main=1.811843, smooth=0.793867) | lr=1.000000e-03 | time=117.19s
+[Epoch 136] train=3.184740 (main=3.103081, smooth=0.816595) | val=1.560592 (main=1.481454, smooth=0.791382) | lr=1.000000e-03 | time=114.82s
+[Epoch 137] train=3.187199 (main=3.105377, smooth=0.818221) | val=1.690442 (main=1.611147, smooth=0.792956) | lr=1.000000e-03 | time=122.58s
+[Epoch 138] train=3.185208 (main=3.103383, smooth=0.818246) | val=1.537078 (main=1.457602, smooth=0.794761) | lr=1.000000e-03 | time=129.88s
+[Epoch 139] train=3.196722 (main=3.114867, smooth=0.818549) | val=1.454921 (main=1.375121, smooth=0.798001) | lr=1.000000e-03 | time=112.18s
+[Epoch 140] train=3.243868 (main=3.162006, smooth=0.818625) | val=1.670925 (main=1.590645, smooth=0.802799) | lr=1.000000e-03 | time=121.81s
+[Epoch 141] train=3.224577 (main=3.142736, smooth=0.818411) | val=1.612972 (main=1.533258, smooth=0.797141) | lr=1.000000e-03 | time=115.59s
+[Epoch 142] train=3.211356 (main=3.129913, smooth=0.814436) | val=1.686771 (main=1.607690, smooth=0.790804) | lr=1.000000e-03 | time=101.60s
+[Epoch 143] train=3.201821 (main=3.120586, smooth=0.812343) | val=1.608768 (main=1.529687, smooth=0.790811) | lr=1.000000e-03 | time=121.57s
+[Epoch 144] train=3.199965 (main=3.118883, smooth=0.810821) | val=1.524660 (main=1.445139, smooth=0.795212) | lr=1.000000e-03 | time=117.91s
+[Epoch 145] train=3.196267 (main=3.115046, smooth=0.812215) | val=1.539381 (main=1.460070, smooth=0.793111) | lr=1.000000e-03 | time=117.00s
+[Epoch 146] train=3.203909 (main=3.122661, smooth=0.812481) | val=1.749439 (main=1.670246, smooth=0.791928) | lr=1.000000e-03 | time=109.27s
+[Epoch 147] train=3.202784 (main=3.121512, smooth=0.812719) | val=1.797430 (main=1.718269, smooth=0.791614) | lr=1.000000e-03 | time=118.19s
+[Epoch 148] train=3.205082 (main=3.123869, smooth=0.812128) | val=1.618645 (main=1.539261, smooth=0.793841) | lr=1.000000e-03 | time=118.02s
+[Epoch 149] train=3.190469 (main=3.109182, smooth=0.812864) | val=1.447990 (main=1.368092, smooth=0.798987) | lr=1.000000e-03 | time=115.41s
+[Epoch 150] train=3.196356 (main=3.114917, smooth=0.814392) | val=1.720579 (main=1.641412, smooth=0.791674) | lr=1.000000e-03 | time=122.17s
+[Epoch 151] train=3.197883 (main=3.116360, smooth=0.815234) | val=1.639581 (main=1.560091, smooth=0.794905) | lr=1.000000e-03 | time=111.69s
+[Epoch 152] train=3.185498 (main=3.104093, smooth=0.814051) | val=1.498018 (main=1.418793, smooth=0.792251) | lr=1.000000e-03 | time=115.15s
+[Epoch 153] train=3.190099 (main=3.108834, smooth=0.812651) | val=1.719560 (main=1.640109, smooth=0.794509) | lr=1.000000e-03 | time=112.00s
+[Epoch 154] train=3.187822 (main=3.106458, smooth=0.813637) | val=1.570104 (main=1.490467, smooth=0.796364) | lr=1.000000e-03 | time=119.51s
+[Epoch 155] train=3.187387 (main=3.105995, smooth=0.813920) | val=1.536417 (main=1.457012, smooth=0.794046) | lr=1.000000e-03 | time=112.42s
+[Epoch 156] train=3.194895 (main=3.113406, smooth=0.814893) | val=1.531162 (main=1.451925, smooth=0.792371) | lr=1.000000e-03 | time=115.22s
+[Epoch 157] train=3.194463 (main=3.113067, smooth=0.813954) | val=1.749954 (main=1.670312, smooth=0.796413) | lr=1.000000e-03 | time=122.07s
+[Epoch 158] train=3.185427 (main=3.104069, smooth=0.813574) | val=1.502300 (main=1.422891, smooth=0.794090) | lr=1.000000e-03 | time=115.22s
+[Epoch 159] train=3.186225 (main=3.105078, smooth=0.811469) | val=1.701707 (main=1.622496, smooth=0.792112) | lr=1.000000e-03 | time=126.09s
+[Epoch 160] train=3.173209 (main=3.092000, smooth=0.812096) | val=1.505314 (main=1.425868, smooth=0.794461) | lr=1.000000e-03 | time=107.80s
+[Epoch 161] train=3.195580 (main=3.114509, smooth=0.810706) | val=1.636256 (main=1.556895, smooth=0.793611) | lr=1.000000e-03 | time=114.43s
+[Epoch 162] train=3.184790 (main=3.103784, smooth=0.810065) | val=1.634860 (main=1.555698, smooth=0.791623) | lr=1.000000e-03 | time=112.40s
+[Epoch 163] train=3.205308 (main=3.124615, smooth=0.806932) | val=1.537668 (main=1.458224, smooth=0.794438) | lr=1.000000e-03 | time=121.89s
+[Epoch 164] train=3.181850 (main=3.101211, smooth=0.806392) | val=2.072950 (main=1.993231, smooth=0.797193) | lr=1.000000e-03 | time=112.90s
+[Epoch 165] train=3.209206 (main=3.128318, smooth=0.808890) | val=1.510867 (main=1.431643, smooth=0.792241) | lr=1.000000e-03 | time=122.99s
+[Epoch 166] train=3.239324 (main=3.158304, smooth=0.810202) | val=1.654081 (main=1.574920, smooth=0.791607) | lr=1.000000e-03 | time=121.07s
+[Epoch 167] train=3.226041 (main=3.144671, smooth=0.813702) | val=1.570814 (main=1.491368, smooth=0.794461) | lr=1.000000e-03 | time=129.32s
+[Epoch 168] train=3.205918 (main=3.124476, smooth=0.814420) | val=1.594986 (main=1.515699, smooth=0.792871) | lr=1.000000e-03 | time=118.43s
+[Epoch 169] train=3.211155 (main=3.129903, smooth=0.812525) | val=1.707966 (main=1.628508, smooth=0.794578) | lr=1.000000e-03 | time=103.25s
+[Epoch 170] train=3.176724 (main=3.095370, smooth=0.813537) | val=1.458735 (main=1.379266, smooth=0.794693) | lr=1.000000e-03 | time=121.07s
+[Epoch 171] train=3.199947 (main=3.118553, smooth=0.813936) | val=1.816313 (main=1.737202, smooth=0.791108) | lr=1.000000e-03 | time=109.20s
+[Epoch 172] train=3.176697 (main=3.095101, smooth=0.815960) | val=1.467586 (main=1.388224, smooth=0.793619) | lr=1.000000e-03 | time=104.76s
+[Epoch 173] train=3.264472 (main=3.183038, smooth=0.814336) | val=1.555111 (main=1.476274, smooth=0.788376) | lr=1.000000e-03 | time=118.12s
+[Epoch 174] train=3.223488 (main=3.142197, smooth=0.812903) | val=1.871079 (main=1.791937, smooth=0.791412) | lr=1.000000e-03 | time=122.11s
+[Epoch 175] train=3.229147 (main=3.147980, smooth=0.811670) | val=1.532775 (main=1.453637, smooth=0.791379) | lr=1.000000e-03 | time=129.10s
+[Epoch 176] train=3.230642 (main=3.149495, smooth=0.811474) | val=1.642169 (main=1.562263, smooth=0.799055) | lr=1.000000e-03 | time=113.50s
+[Epoch 177] train=3.219935 (main=3.138767, smooth=0.811671) | val=1.540713 (main=1.461508, smooth=0.792051) | lr=1.000000e-03 | time=111.04s
+[Epoch 178] train=3.234445 (main=3.153205, smooth=0.812403) | val=1.639917 (main=1.561068, smooth=0.788497) | lr=1.000000e-03 | time=122.67s
+[Epoch 179] train=3.178252 (main=3.097067, smooth=0.811852) | val=1.780814 (main=1.702287, smooth=0.785272) | lr=1.000000e-03 | time=129.60s
+[Epoch 180] train=3.254385 (main=3.173035, smooth=0.813503) | val=1.629603 (main=1.550868, smooth=0.787346) | lr=1.000000e-03 | time=121.12s
+[Epoch 181] train=3.225304 (main=3.144032, smooth=0.812720) | val=1.880525 (main=1.801545, smooth=0.789795) | lr=1.000000e-03 | time=122.92s
+[Epoch 182] train=3.214486 (main=3.133045, smooth=0.814403) | val=1.477320 (main=1.398056, smooth=0.792633) | lr=1.000000e-03 | time=113.14s
+[Epoch 183] train=3.292672 (main=3.211167, smooth=0.815048) | val=1.672901 (main=1.593613, smooth=0.792886) | lr=1.000000e-03 | time=119.01s
+[Epoch 184] train=3.245407 (main=3.163905, smooth=0.815012) | val=1.575140 (main=1.495906, smooth=0.792343) | lr=1.000000e-03 | time=119.55s
+[Epoch 185] train=3.246812 (main=3.165272, smooth=0.815392) | val=1.580055 (main=1.501272, smooth=0.787836) | lr=1.000000e-03 | time=111.91s
+[Epoch 186] train=3.196733 (main=3.115227, smooth=0.815061) | val=1.665905 (main=1.586834, smooth=0.790710) | lr=1.000000e-03 | time=110.18s
+[Epoch 187] train=3.224327 (main=3.142894, smooth=0.814333) | val=1.649862 (main=1.570589, smooth=0.792731) | lr=1.000000e-03 | time=110.24s
+[Epoch 188] train=3.213137 (main=3.131675, smooth=0.814622) | val=1.691229 (main=1.612347, smooth=0.788819) | lr=1.000000e-03 | time=117.19s
+[Epoch 189] train=3.217936 (main=3.136529, smooth=0.814078) | val=1.800629 (main=1.721815, smooth=0.788139) | lr=1.000000e-03 | time=107.73s
+[Epoch 190] train=3.264580 (main=3.183011, smooth=0.815686) | val=1.775467 (main=1.696732, smooth=0.787347) | lr=1.000000e-03 | time=116.49s
+[Epoch 191] train=3.235182 (main=3.153619, smooth=0.815630) | val=1.663474 (main=1.584506, smooth=0.789681) | lr=1.000000e-03 | time=118.42s
+[Epoch 192] train=3.225766 (main=3.144233, smooth=0.815329) | val=1.646703 (main=1.567389, smooth=0.793145) | lr=1.000000e-03 | time=113.02s
+[Epoch 193] train=3.216766 (main=3.135203, smooth=0.815629) | val=1.940071 (main=1.860806, smooth=0.792652) | lr=1.000000e-03 | time=113.72s
+[Epoch 194] train=3.224140 (main=3.142511, smooth=0.816289) | val=1.557730 (main=1.478784, smooth=0.789459) | lr=1.000000e-03 | time=109.31s
+[Epoch 195] train=3.239513 (main=3.157981, smooth=0.815315) | val=1.772729 (main=1.693895, smooth=0.788346) | lr=1.000000e-03 | time=102.19s
+[Epoch 196] train=3.241910 (main=3.160483, smooth=0.814271) | val=1.569551 (main=1.490326, smooth=0.792248) | lr=1.000000e-03 | time=119.41s
+[Epoch 197] train=3.247405 (main=3.166039, smooth=0.813658) | val=1.768578 (main=1.689583, smooth=0.789946) | lr=1.000000e-03 | time=121.18s
+[Epoch 198] train=3.259030 (main=3.177571, smooth=0.814590) | val=1.744064 (main=1.664982, smooth=0.790820) | lr=1.000000e-03 | time=120.35s
+[Epoch 199] train=3.258575 (main=3.177049, smooth=0.815254) | val=1.802526 (main=1.723777, smooth=0.787492) | lr=1.000000e-03 | time=107.87s
+[Epoch 200] train=3.251828 (main=3.170377, smooth=0.814509) | val=1.630756 (main=1.551791, smooth=0.789649) | lr=1.000000e-03 | time=113.43s
+[Epoch 201] train=3.228946 (main=3.147553, smooth=0.813931) | val=1.595430 (main=1.516739, smooth=0.786911) | lr=1.000000e-03 | time=115.88s
+[Epoch 202] train=3.219728 (main=3.138302, smooth=0.814261) | val=1.606631 (main=1.527330, smooth=0.793011) | lr=1.000000e-03 | time=115.21s
+[Epoch 203] train=3.223239 (main=3.141912, smooth=0.813261) | val=1.694852 (main=1.615638, smooth=0.792138) | lr=1.000000e-03 | time=122.55s
+[Epoch 204] train=3.240144 (main=3.158968, smooth=0.811767) | val=1.655499 (main=1.576596, smooth=0.789031) | lr=1.000000e-03 | time=117.84s
+[Epoch 205] train=3.208164 (main=3.127022, smooth=0.811421) | val=1.711312 (main=1.632107, smooth=0.792058) | lr=1.000000e-03 | time=132.58s
+[Epoch 206] train=3.196858 (main=3.115699, smooth=0.811592) | val=1.638818 (main=1.559670, smooth=0.791480) | lr=1.000000e-03 | time=119.23s
+[Epoch 207] train=3.168715 (main=3.087372, smooth=0.813433) | val=1.582196 (main=1.502872, smooth=0.793241) | lr=1.000000e-03 | time=122.27s
+[Epoch 208] train=3.254391 (main=3.172989, smooth=0.814026) | val=1.664765 (main=1.585413, smooth=0.793519) | lr=1.000000e-03 | time=124.89s
+[Epoch 209] train=3.207015 (main=3.125644, smooth=0.813717) | val=1.722989 (main=1.643407, smooth=0.795825) | lr=1.000000e-03 | time=118.41s
+[Epoch 210] train=3.211869 (main=3.130533, smooth=0.813364) | val=2.064578 (main=1.980437, smooth=0.841418) | lr=1.000000e-03 | time=117.69s
+[Epoch 211] train=3.235063 (main=3.153769, smooth=0.812935) | val=3.701786 (main=3.606977, smooth=0.948097) | lr=1.000000e-03 | time=121.94s
+[Epoch 212] train=3.248421 (main=3.167117, smooth=0.813036) | val=1.729382 (main=1.649776, smooth=0.796052) | lr=1.000000e-03 | time=112.91s
+[Epoch 213] train=3.206719 (main=3.125440, smooth=0.812785) | val=1.995442 (main=1.912565, smooth=0.828764) | lr=1.000000e-03 | time=112.41s
+[Epoch 214] train=3.204437 (main=3.123154, smooth=0.812828) | val=1.684807 (main=1.605589, smooth=0.792177) | lr=1.000000e-03 | time=119.11s
+[Epoch 215] train=3.208679 (main=3.127375, smooth=0.813035) | val=1.630803 (main=1.551637, smooth=0.791658) | lr=1.000000e-03 | time=127.00s
+[Epoch 216] train=3.241342 (main=3.160025, smooth=0.813173) | val=1.608912 (main=1.530033, smooth=0.788794) | lr=1.000000e-03 | time=121.76s
+[Epoch 217] train=3.222237 (main=3.140780, smooth=0.814572) | val=1.534535 (main=1.455270, smooth=0.792647) | lr=1.000000e-03 | time=125.29s
+[Epoch 218] train=3.238920 (main=3.157530, smooth=0.813902) | val=1.613823 (main=1.534676, smooth=0.791462) | lr=1.000000e-03 | time=115.90s
+[Epoch 219] train=3.215678 (main=3.134423, smooth=0.812555) | val=1.573124 (main=1.494133, smooth=0.789910) | lr=1.000000e-03 | time=120.58s
+[Epoch 220] train=3.213916 (main=3.132662, smooth=0.812544) | val=1.641232 (main=1.562308, smooth=0.789241) | lr=1.000000e-03 | time=122.99s
+[Epoch 221] train=3.208603 (main=3.127491, smooth=0.811117) | val=1.537752 (main=1.459062, smooth=0.786904) | lr=1.000000e-03 | time=117.23s
+[Epoch 222] train=3.249561 (main=3.168308, smooth=0.812533) | val=1.620406 (main=1.541235, smooth=0.791716) | lr=1.000000e-03 | time=104.37s
+[Epoch 223] train=3.217188 (main=3.136024, smooth=0.811647) | val=1.678019 (main=1.599049, smooth=0.789700) | lr=1.000000e-03 | time=105.83s
+[Epoch 224] train=3.218884 (main=3.137765, smooth=0.811189) | val=1.682783 (main=1.604089, smooth=0.786938) | lr=1.000000e-03 | time=118.04s
+[Epoch 225] train=3.223279 (main=3.142170, smooth=0.811089) | val=1.595084 (main=1.516052, smooth=0.790318) | lr=1.000000e-03 | time=119.81s
+[Epoch 226] train=3.222293 (main=3.141104, smooth=0.811891) | val=1.737971 (main=1.658713, smooth=0.792576) | lr=1.000000e-03 | time=118.59s
+[Epoch 227] train=3.227603 (main=3.146439, smooth=0.811634) | val=1.575240 (main=1.495974, smooth=0.792654) | lr=1.000000e-03 | time=122.41s
+[Epoch 228] train=3.204014 (main=3.122653, smooth=0.813610) | val=1.834445 (main=1.754131, smooth=0.803141) | lr=1.000000e-03 | time=121.92s
+[Epoch 229] train=3.225129 (main=3.143961, smooth=0.811685) | val=1.638823 (main=1.560267, smooth=0.785561) | lr=1.000000e-03 | time=119.13s
+[Epoch 230] train=3.213930 (main=3.132797, smooth=0.811334) | val=1.654252 (main=1.575757, smooth=0.784954) | lr=1.000000e-03 | time=120.84s
+[Epoch 231] train=3.208185 (main=3.127038, smooth=0.811463) | val=1.764200 (main=1.685347, smooth=0.788531) | lr=1.000000e-03 | time=114.23s
+[Epoch 232] train=3.199617 (main=3.118460, smooth=0.811564) | val=1.579583 (main=1.500731, smooth=0.788515) | lr=1.000000e-03 | time=128.32s
+[Epoch 233] train=3.227147 (main=3.146077, smooth=0.810699) | val=1.664333 (main=1.585765, smooth=0.785687) | lr=1.000000e-03 | time=111.63s
+[Epoch 234] train=3.229953 (main=3.149123, smooth=0.808299) | val=1.710657 (main=1.631686, smooth=0.789708) | lr=1.000000e-03 | time=120.19s
+[Epoch 235] train=3.333150 (main=3.251980, smooth=0.811700) | val=1.693400 (main=1.615079, smooth=0.783203) | lr=1.000000e-03 | time=119.98s
+[Epoch 236] train=3.258353 (main=3.177077, smooth=0.812764) | val=1.537731 (main=1.459104, smooth=0.786269) | lr=1.000000e-03 | time=122.35s
+[Epoch 237] train=3.274916 (main=3.193652, smooth=0.812635) | val=1.701517 (main=1.623067, smooth=0.784497) | lr=1.000000e-03 | time=122.87s
+[Epoch 238] train=3.265521 (main=3.184275, smooth=0.812466) | val=1.574850 (main=1.496415, smooth=0.784350) | lr=1.000000e-03 | time=106.33s
+[Epoch 239] train=3.282576 (main=3.201317, smooth=0.812588) | val=1.959660 (main=1.880900, smooth=0.787595) | lr=1.000000e-03 | time=122.72s
+[Epoch 240] train=3.343567 (main=3.262275, smooth=0.812919) | val=1.599854 (main=1.521385, smooth=0.784692) | lr=1.000000e-03 | time=131.77s
+[Epoch 241] train=3.220337 (main=3.139271, smooth=0.810663) | val=1.526850 (main=1.448393, smooth=0.784565) | lr=1.000000e-03 | time=115.92s
+[Epoch 242] train=3.221592 (main=3.140581, smooth=0.810107) | val=1.762715 (main=1.683662, smooth=0.790529) | lr=1.000000e-03 | time=114.27s
+[Epoch 243] train=3.257167 (main=3.176296, smooth=0.808719) | val=1.677145 (main=1.598565, smooth=0.785805) | lr=1.000000e-03 | time=129.06s
+[Epoch 244] train=3.202271 (main=3.121387, smooth=0.808835) | val=1.741824 (main=1.663197, smooth=0.786264) | lr=1.000000e-03 | time=121.58s
+[Epoch 245] train=3.229864 (main=3.149064, smooth=0.807999) | val=1.615368 (main=1.537001, smooth=0.783673) | lr=1.000000e-03 | time=117.04s
+[Epoch 246] train=3.259316 (main=3.178605, smooth=0.807110) | val=1.617867 (main=1.539338, smooth=0.785291) | lr=1.000000e-03 | time=121.83s
+[Epoch 247] train=3.245571 (main=3.164824, smooth=0.807472) | val=1.616514 (main=1.537887, smooth=0.786271) | lr=1.000000e-03 | time=115.69s
+[Epoch 248] train=3.247628 (main=3.166811, smooth=0.808169) | val=1.724751 (main=1.646033, smooth=0.787184) | lr=1.000000e-03 | time=120.35s
+[Epoch 249] train=3.233842 (main=3.153176, smooth=0.806665) | val=1.545517 (main=1.467044, smooth=0.784724) | lr=1.000000e-03 | time=114.51s
+[Epoch 250] train=3.226678 (main=3.146257, smooth=0.804213) | val=1.574438 (main=1.495915, smooth=0.785232) | lr=1.000000e-03 | time=107.11s
+[Epoch 251] train=3.223628 (main=3.143254, smooth=0.803736) | val=1.587940 (main=1.509681, smooth=0.782594) | lr=1.000000e-03 | time=122.93s
+[Epoch 252] train=3.246823 (main=3.166471, smooth=0.803526) | val=1.708713 (main=1.630490, smooth=0.782228) | lr=1.000000e-03 | time=115.10s
+[Epoch 253] train=3.238108 (main=3.157691, smooth=0.804172) | val=1.670407 (main=1.592125, smooth=0.782821) | lr=1.000000e-03 | time=110.52s
+[Epoch 254] train=3.267639 (main=3.187084, smooth=0.805548) | val=1.668974 (main=1.590617, smooth=0.783573) | lr=1.000000e-03 | time=112.43s
+[Epoch 255] train=3.257066 (main=3.176444, smooth=0.806215) | val=1.641109 (main=1.562802, smooth=0.783071) | lr=1.000000e-03 | time=118.21s
+[Epoch 256] train=3.215112 (main=3.134404, smooth=0.807078) | val=1.661250 (main=1.582642, smooth=0.786083) | lr=1.000000e-03 | time=114.09s
+[Epoch 257] train=3.234686 (main=3.154014, smooth=0.806723) | val=1.729662 (main=1.651243, smooth=0.784189) | lr=1.000000e-03 | time=125.52s
+[Epoch 258] train=3.220459 (main=3.139819, smooth=0.806400) | val=1.644117 (main=1.565629, smooth=0.784874) | lr=1.000000e-03 | time=118.36s
+[Epoch 259] train=3.224506 (main=3.143951, smooth=0.805545) | val=1.664570 (main=1.586231, smooth=0.783393) | lr=1.000000e-03 | time=119.14s
+[Epoch 260] train=3.209670 (main=3.129089, smooth=0.805816) | val=1.780109 (main=1.701788, smooth=0.783206) | lr=1.000000e-03 | time=122.63s
+[Epoch 261] train=3.219925 (main=3.139254, smooth=0.806712) | val=1.719173 (main=1.641023, smooth=0.781497) | lr=1.000000e-03 | time=117.37s
+[Epoch 262] train=3.212774 (main=3.131994, smooth=0.807799) | val=1.600409 (main=1.522177, smooth=0.782318) | lr=1.000000e-03 | time=122.25s
+[Epoch 263] train=3.223875 (main=3.143139, smooth=0.807362) | val=1.601363 (main=1.523163, smooth=0.781995) | lr=1.000000e-03 | time=111.87s
+[Epoch 264] train=3.215500 (main=3.134856, smooth=0.806436) | val=1.584694 (main=1.506405, smooth=0.782897) | lr=1.000000e-03 | time=118.10s
+[Epoch 265] train=3.226833 (main=3.146146, smooth=0.806876) | val=1.632073 (main=1.553825, smooth=0.782486) | lr=1.000000e-03 | time=114.12s
+[Epoch 266] train=3.207184 (main=3.126515, smooth=0.806692) | val=1.769992 (main=1.691586, smooth=0.784058) | lr=1.000000e-03 | time=121.25s
+[Epoch 267] train=3.220868 (main=3.140153, smooth=0.807154) | val=1.601203 (main=1.522781, smooth=0.784220) | lr=1.000000e-03 | time=107.73s
+[Epoch 268] train=3.207060 (main=3.126447, smooth=0.806130) | val=1.677324 (main=1.599079, smooth=0.782449) | lr=1.000000e-03 | time=118.57s
+[Epoch 269] train=3.188899 (main=3.108305, smooth=0.805947) | val=1.695427 (main=1.616845, smooth=0.785826) | lr=1.000000e-03 | time=124.52s
+[Epoch 270] train=3.207955 (main=3.127319, smooth=0.806355) | val=1.635317 (main=1.555188, smooth=0.801292) | lr=1.000000e-03 | time=124.88s
+[Epoch 271] train=3.195461 (main=3.114869, smooth=0.805922) | val=1.718377 (main=1.638983, smooth=0.793935) | lr=1.000000e-03 | time=112.55s
+[Epoch 272] train=3.199192 (main=3.118603, smooth=0.805891) | val=1.580200 (main=1.501462, smooth=0.787377) | lr=1.000000e-03 | time=129.78s
+[Epoch 273] train=3.219364 (main=3.138743, smooth=0.806214) | val=1.652644 (main=1.574263, smooth=0.783810) | lr=1.000000e-03 | time=116.43s
+[Epoch 274] train=3.207717 (main=3.126980, smooth=0.807368) | val=1.588865 (main=1.510387, smooth=0.784781) | lr=1.000000e-03 | time=103.89s
+[Epoch 275] train=3.211475 (main=3.130712, smooth=0.807633) | val=1.606029 (main=1.527543, smooth=0.784855) | lr=1.000000e-03 | time=127.70s
+[Epoch 276] train=3.196933 (main=3.116199, smooth=0.807333) | val=1.628451 (main=1.549676, smooth=0.787745) | lr=1.000000e-03 | time=116.80s
+[Epoch 277] train=3.168552 (main=3.087617, smooth=0.809354) | val=1.527421 (main=1.448570, smooth=0.788504) | lr=1.000000e-03 | time=117.57s
+[Epoch 278] train=3.185720 (main=3.104778, smooth=0.809422) | val=1.527471 (main=1.448554, smooth=0.789168) | lr=1.000000e-03 | time=109.66s
+[Epoch 279] train=3.216167 (main=3.135202, smooth=0.809652) | val=1.589882 (main=1.511384, smooth=0.784982) | lr=1.000000e-03 | time=122.27s
+[Epoch 280] train=3.174063 (main=3.093062, smooth=0.810006) | val=1.565582 (main=1.486726, smooth=0.788556) | lr=1.000000e-03 | time=116.28s
+[Epoch 281] train=3.205411 (main=3.124503, smooth=0.809076) | val=1.687875 (main=1.609356, smooth=0.785192) | lr=1.000000e-03 | time=112.07s
+[Epoch 282] train=3.210944 (main=3.130089, smooth=0.808549) | val=1.546492 (main=1.467926, smooth=0.785662) | lr=1.000000e-03 | time=114.29s
+[Epoch 283] train=3.192179 (main=3.111276, smooth=0.809032) | val=1.791349 (main=1.712889, smooth=0.784605) | lr=1.000000e-03 | time=123.43s
+[Epoch 284] train=3.187450 (main=3.106417, smooth=0.810322) | val=1.579113 (main=1.500577, smooth=0.785362) | lr=1.000000e-03 | time=122.02s
+[Epoch 285] train=3.192472 (main=3.111517, smooth=0.809549) | val=1.800387 (main=1.721954, smooth=0.784330) | lr=1.000000e-03 | time=112.98s
+[Epoch 286] train=3.211692 (main=3.130667, smooth=0.810253) | val=1.562223 (main=1.483682, smooth=0.785414) | lr=1.000000e-03 | time=120.94s
+[Epoch 287] train=3.218889 (main=3.137934, smooth=0.809544) | val=1.650135 (main=1.571825, smooth=0.783106) | lr=1.000000e-03 | time=116.37s
+[Epoch 288] train=3.200954 (main=3.120021, smooth=0.809330) | val=1.605080 (main=1.526706, smooth=0.783735) | lr=1.000000e-03 | time=123.51s
+[Epoch 289] train=3.274067 (main=3.192896, smooth=0.811717) | val=1.602204 (main=1.523920, smooth=0.782845) | lr=1.000000e-03 | time=125.03s
+[Epoch 290] train=3.192953 (main=3.111874, smooth=0.810791) | val=1.524271 (main=1.446127, smooth=0.781435) | lr=1.000000e-03 | time=126.51s
+[Epoch 291] train=3.234674 (main=3.153640, smooth=0.810338) | val=1.661312 (main=1.583023, smooth=0.782893) | lr=1.000000e-03 | time=127.56s
+[Epoch 292] train=3.179369 (main=3.098372, smooth=0.809963) | val=1.775544 (main=1.697060, smooth=0.784835) | lr=1.000000e-03 | time=123.40s
+[Epoch 293] train=3.212738 (main=3.131913, smooth=0.808249) | val=1.608114 (main=1.529649, smooth=0.784655) | lr=1.000000e-03 | time=121.37s
+[Epoch 294] train=3.187339 (main=3.106546, smooth=0.807932) | val=1.849708 (main=1.771341, smooth=0.783673) | lr=1.000000e-03 | time=120.27s
+[Epoch 295] train=3.204968 (main=3.124137, smooth=0.808311) | val=1.813327 (main=1.735256, smooth=0.780711) | lr=1.000000e-03 | time=106.32s
+[Epoch 296] train=3.196040 (main=3.115018, smooth=0.810220) | val=1.752424 (main=1.674287, smooth=0.781370) | lr=1.000000e-03 | time=111.29s
+[Epoch 297] train=3.204897 (main=3.123824, smooth=0.810732) | val=1.619095 (main=1.540823, smooth=0.782721) | lr=1.000000e-03 | time=125.43s
+[Epoch 298] train=3.202594 (main=3.121601, smooth=0.809925) | val=1.647278 (main=1.568814, smooth=0.784642) | lr=1.000000e-03 | time=123.70s
+[Epoch 299] train=3.189898 (main=3.108891, smooth=0.810069) | val=1.650411 (main=1.572307, smooth=0.781037) | lr=1.000000e-03 | time=113.35s
+[Epoch 300] train=3.226689 (main=3.145608, smooth=0.810814) | val=1.755770 (main=1.677406, smooth=0.783645) | lr=1.000000e-03 | time=117.34s
+[Epoch 301] train=3.196840 (main=3.115830, smooth=0.810099) | val=1.712056 (main=1.633337, smooth=0.787191) | lr=1.000000e-03 | time=121.66s
+[Epoch 302] train=3.183074 (main=3.101949, smooth=0.811246) | val=1.552202 (main=1.473844, smooth=0.783586) | lr=1.000000e-03 | time=114.60s
+[Epoch 303] train=3.169983 (main=3.088848, smooth=0.811354) | val=1.659047 (main=1.580435, smooth=0.786118) | lr=1.000000e-03 | time=120.77s
+[Epoch 304] train=3.163155 (main=3.082055, smooth=0.811003) | val=1.578002 (main=1.499494, smooth=0.785083) | lr=1.000000e-03 | time=129.95s
+[Epoch 305] train=3.174385 (main=3.093273, smooth=0.811117) | val=1.516930 (main=1.438025, smooth=0.789049) | lr=1.000000e-03 | time=120.57s
+[Epoch 306] train=3.192777 (main=3.111759, smooth=0.810186) | val=1.605161 (main=1.526666, smooth=0.784943) | lr=1.000000e-03 | time=113.91s
+[Epoch 307] train=3.194333 (main=3.113326, smooth=0.810073) | val=1.622093 (main=1.543556, smooth=0.785367) | lr=1.000000e-03 | time=123.62s
+[Epoch 308] train=3.172685 (main=3.091488, smooth=0.811965) | val=1.563093 (main=1.484615, smooth=0.784779) | lr=1.000000e-03 | time=121.13s
+[Epoch 309] train=3.245188 (main=3.163873, smooth=0.813146) | val=1.755703 (main=1.677362, smooth=0.783410) | lr=1.000000e-03 | time=120.70s
+[Epoch 310] train=3.211988 (main=3.130501, smooth=0.814870) | val=1.488530 (main=1.410058, smooth=0.784720) | lr=1.000000e-03 | time=118.51s
+[Epoch 311] train=3.224296 (main=3.142948, smooth=0.813479) | val=1.605868 (main=1.527416, smooth=0.784521) | lr=1.000000e-03 | time=119.84s
+[Epoch 312] train=3.197029 (main=3.115883, smooth=0.811458) | val=1.731230 (main=1.652934, smooth=0.782955) | lr=1.000000e-03 | time=120.77s
+[Epoch 313] train=3.206830 (main=3.125830, smooth=0.809994) | val=1.621546 (main=1.542998, smooth=0.785477) | lr=1.000000e-03 | time=116.03s
+[Epoch 314] train=3.207397 (main=3.126329, smooth=0.810687) | val=1.752431 (main=1.674061, smooth=0.783702) | lr=1.000000e-03 | time=114.78s
+[Epoch 315] train=3.189987 (main=3.108826, smooth=0.811610) | val=1.540262 (main=1.461794, smooth=0.784675) | lr=1.000000e-03 | time=103.38s
+[Epoch 316] train=3.201106 (main=3.119931, smooth=0.811751) | val=1.657014 (main=1.578529, smooth=0.784855) | lr=1.000000e-03 | time=101.81s
+[Epoch 317] train=3.206200 (main=3.124888, smooth=0.813117) | val=1.599135 (main=1.520680, smooth=0.784546) | lr=1.000000e-03 | time=105.76s
+[Epoch 318] train=3.206438 (main=3.125184, smooth=0.812536) | val=1.583283 (main=1.504901, smooth=0.783823) | lr=1.000000e-03 | time=126.57s
+[Epoch 319] train=3.187967 (main=3.106790, smooth=0.811774) | val=1.673941 (main=1.595314, smooth=0.786269) | lr=1.000000e-03 | time=125.79s
+[Epoch 320] train=3.193742 (main=3.112474, smooth=0.812677) | val=1.688375 (main=1.609786, smooth=0.785884) | lr=1.000000e-03 | time=113.68s
+[Epoch 321] train=3.192750 (main=3.111470, smooth=0.812808) | val=1.682667 (main=1.604385, smooth=0.782823) | lr=1.000000e-03 | time=111.37s
+[Epoch 322] train=3.218288 (main=3.136988, smooth=0.813008) | val=1.595233 (main=1.516772, smooth=0.784607) | lr=1.000000e-03 | time=126.80s
+[Epoch 323] train=3.206460 (main=3.125100, smooth=0.813598) | val=1.532546 (main=1.453858, smooth=0.786887) | lr=1.000000e-03 | time=122.54s
+[Epoch 324] train=3.207927 (main=3.126532, smooth=0.813946) | val=1.557504 (main=1.478858, smooth=0.786464) | lr=1.000000e-03 | time=121.80s
+[Epoch 325] train=3.280114 (main=3.198324, smooth=0.817900) | val=1.699933 (main=1.621428, smooth=0.785051) | lr=1.000000e-03 | time=119.41s
+[Epoch 326] train=3.225078 (main=3.143501, smooth=0.815771) | val=1.557015 (main=1.478303, smooth=0.787118) | lr=1.000000e-03 | time=119.93s
+[Epoch 327] train=3.215390 (main=3.134034, smooth=0.813557) | val=1.529506 (main=1.450830, smooth=0.786760) | lr=1.000000e-03 | time=114.04s
+[Epoch 328] train=3.166282 (main=3.084964, smooth=0.813186) | val=1.938390 (main=1.859747, smooth=0.786429) | lr=1.000000e-03 | time=114.03s
+[Epoch 329] train=3.235530 (main=3.154129, smooth=0.814007) | val=1.676481 (main=1.598027, smooth=0.784539) | lr=1.000000e-03 | time=120.93s
+[Epoch 330] train=3.190958 (main=3.109580, smooth=0.813777) | val=1.541087 (main=1.462714, smooth=0.783734) | lr=1.000000e-03 | time=124.11s
+[Epoch 331] train=3.209045 (main=3.127637, smooth=0.814077) | val=1.594460 (main=1.516112, smooth=0.783472) | lr=1.000000e-03 | time=118.44s
+[Epoch 332] train=3.223930 (main=3.142472, smooth=0.814579) | val=1.580887 (main=1.502492, smooth=0.783947) | lr=1.000000e-03 | time=124.29s
+[Epoch 333] train=3.213640 (main=3.132322, smooth=0.813180) | val=1.602015 (main=1.523628, smooth=0.783877) | lr=1.000000e-03 | time=123.85s
+[Epoch 334] train=3.194990 (main=3.113761, smooth=0.812288) | val=1.543182 (main=1.464767, smooth=0.784149) | lr=1.000000e-03 | time=125.06s
+[Epoch 335] train=3.201377 (main=3.120233, smooth=0.811440) | val=1.957570 (main=1.877181, smooth=0.803890) | lr=1.000000e-03 | time=119.74s
+[Epoch 336] train=3.208061 (main=3.126825, smooth=0.812361) | val=1.642052 (main=1.563462, smooth=0.785905) | lr=1.000000e-03 | time=126.26s
+[Epoch 337] train=3.213519 (main=3.132310, smooth=0.812097) | val=1.647183 (main=1.568771, smooth=0.784125) | lr=1.000000e-03 | time=117.81s
+[Epoch 338] train=3.204093 (main=3.122910, smooth=0.811827) | val=1.580369 (main=1.501692, smooth=0.786762) | lr=1.000000e-03 | time=119.27s
+[Epoch 339] train=3.198611 (main=3.117558, smooth=0.810527) | val=1.666431 (main=1.587871, smooth=0.785601) | lr=1.000000e-03 | time=126.55s
+[Epoch 340] train=3.164413 (main=3.083390, smooth=0.810228) | val=1.813609 (main=1.734968, smooth=0.786408) | lr=1.000000e-03 | time=109.85s
+[Epoch 341] train=3.218775 (main=3.137785, smooth=0.809899) | val=1.655681 (main=1.577236, smooth=0.784449) | lr=1.000000e-03 | time=121.17s
+[Epoch 342] train=3.203954 (main=3.122941, smooth=0.810124) | val=1.618312 (main=1.539810, smooth=0.785022) | lr=1.000000e-03 | time=119.50s
+[Epoch 343] train=3.202606 (main=3.121445, smooth=0.811617) | val=1.524937 (main=1.446068, smooth=0.788689) | lr=1.000000e-03 | time=114.18s
+[Epoch 344] train=3.197540 (main=3.116428, smooth=0.811117) | val=1.631244 (main=1.552775, smooth=0.784686) | lr=1.000000e-03 | time=116.41s
+[Epoch 345] train=3.202542 (main=3.121636, smooth=0.809060) | val=1.652763 (main=1.574620, smooth=0.781421) | lr=1.000000e-03 | time=128.84s
+[Epoch 346] train=3.191822 (main=3.110970, smooth=0.808518) | val=1.589891 (main=1.511485, smooth=0.784053) | lr=1.000000e-03 | time=114.64s
+[Epoch 347] train=3.198898 (main=3.117997, smooth=0.809010) | val=1.609048 (main=1.530582, smooth=0.784656) | lr=1.000000e-03 | time=116.99s
+[Epoch 348] train=3.180985 (main=3.100120, smooth=0.808648) | val=1.643156 (main=1.565079, smooth=0.780765) | lr=1.000000e-03 | time=110.98s
+[Epoch 349] train=3.184179 (main=3.103215, smooth=0.809642) | val=1.646636 (main=1.568293, smooth=0.783428) | lr=1.000000e-03 | time=118.09s
+[Epoch 350] train=3.195923 (main=3.114808, smooth=0.811141) | val=1.599909 (main=1.521549, smooth=0.783606) | lr=1.000000e-03 | time=117.06s
+[Epoch 351] train=3.188324 (main=3.107434, smooth=0.808900) | val=1.773198 (main=1.694867, smooth=0.783311) | lr=1.000000e-03 | time=126.01s
+[Epoch 352] train=3.198584 (main=3.117592, smooth=0.809927) | val=1.586808 (main=1.508470, smooth=0.783383) | lr=1.000000e-03 | time=103.57s
+[Epoch 353] train=3.196761 (main=3.115665, smooth=0.810960) | val=1.719218 (main=1.640723, smooth=0.784950) | lr=1.000000e-03 | time=119.31s
+[Epoch 354] train=3.189757 (main=3.108650, smooth=0.811069) | val=1.604872 (main=1.526571, smooth=0.783016) | lr=1.000000e-03 | time=118.59s
+[Epoch 355] train=3.206080 (main=3.124931, smooth=0.811484) | val=1.574127 (main=1.495435, smooth=0.786921) | lr=1.000000e-03 | time=119.72s
+[Epoch 356] train=3.200322 (main=3.119190, smooth=0.811319) | val=1.629557 (main=1.551093, smooth=0.784633) | lr=1.000000e-03 | time=119.53s
+[Epoch 357] train=3.185763 (main=3.104659, smooth=0.811044) | val=1.543911 (main=1.465006, smooth=0.789056) | lr=1.000000e-03 | time=117.36s
+[Epoch 358] train=3.205601 (main=3.124502, smooth=0.810994) | val=1.732341 (main=1.653913, smooth=0.784273) | lr=1.000000e-03 | time=109.26s
+[Epoch 359] train=3.233680 (main=3.152494, smooth=0.811853) | val=1.654553 (main=1.576097, smooth=0.784553) | lr=1.000000e-03 | time=120.12s
+[Epoch 360] train=3.199475 (main=3.118294, smooth=0.811806) | val=1.870877 (main=1.792305, smooth=0.785722) | lr=1.000000e-03 | time=117.70s
+[Epoch 361] train=3.204283 (main=3.123086, smooth=0.811971) | val=1.635702 (main=1.557154, smooth=0.785482) | lr=1.000000e-03 | time=124.80s
+[Epoch 362] train=3.201148 (main=3.119942, smooth=0.812063) | val=1.610383 (main=1.531924, smooth=0.784591) | lr=1.000000e-03 | time=117.30s
+[Epoch 363] train=3.221767 (main=3.140527, smooth=0.812404) | val=1.496789 (main=1.418205, smooth=0.785847) | lr=1.000000e-03 | time=122.80s
+[Epoch 364] train=3.137629 (main=3.056297, smooth=0.813319) | val=1.692994 (main=1.614164, smooth=0.788306) | lr=1.000000e-03 | time=118.12s
+[Epoch 365] train=3.198241 (main=3.117031, smooth=0.812100) | val=1.596403 (main=1.517807, smooth=0.785955) | lr=1.000000e-03 | time=109.72s
+[Epoch 366] train=3.201617 (main=3.120514, smooth=0.811037) | val=1.603139 (main=1.524501, smooth=0.786375) | lr=1.000000e-03 | time=122.56s
+[Epoch 367] train=3.210806 (main=3.129728, smooth=0.810782) | val=1.576168 (main=1.497401, smooth=0.787672) | lr=1.000000e-03 | time=119.44s
+[Epoch 368] train=3.197366 (main=3.116272, smooth=0.810944) | val=1.616145 (main=1.537567, smooth=0.785783) | lr=1.000000e-03 | time=111.88s
+[Epoch 369] train=3.227208 (main=3.145970, smooth=0.812383) | val=1.715600 (main=1.637096, smooth=0.785040) | lr=1.000000e-03 | time=127.21s
+[Epoch 370] train=3.213595 (main=3.132362, smooth=0.812337) | val=1.719036 (main=1.640369, smooth=0.786677) | lr=1.000000e-03 | time=114.02s
+[Epoch 371] train=3.216182 (main=3.134983, smooth=0.811989) | val=1.646891 (main=1.568260, smooth=0.786304) | lr=1.000000e-03 | time=125.05s
+[Epoch 372] train=3.213753 (main=3.132588, smooth=0.811656) | val=1.720932 (main=1.642037, smooth=0.788950) | lr=1.000000e-03 | time=113.81s
+[Epoch 373] train=3.216930 (main=3.135714, smooth=0.812159) | val=1.649051 (main=1.570192, smooth=0.788589) | lr=1.000000e-03 | time=113.46s
+[Epoch 374] train=3.195377 (main=3.114159, smooth=0.812181) | val=1.626717 (main=1.548056, smooth=0.786609) | lr=1.000000e-03 | time=109.81s
+[Epoch 375] train=3.198099 (main=3.116878, smooth=0.812217) | val=1.711153 (main=1.632690, smooth=0.784628) | lr=1.000000e-03 | time=112.52s
+[Epoch 376] train=3.210094 (main=3.128784, smooth=0.813102) | val=1.605962 (main=1.527347, smooth=0.786153) | lr=1.000000e-03 | time=109.21s
+[Epoch 377] train=3.215950 (main=3.134594, smooth=0.813557) | val=1.633583 (main=1.555009, smooth=0.785741) | lr=1.000000e-03 | time=102.89s
+[Epoch 378] train=3.202357 (main=3.120955, smooth=0.814018) | val=1.866417 (main=1.788076, smooth=0.783413) | lr=1.000000e-03 | time=103.06s
+[Epoch 379] train=3.213249 (main=3.131883, smooth=0.813659) | val=1.683273 (main=1.604709, smooth=0.785642) | lr=1.000000e-03 | time=117.30s
+[Epoch 380] train=3.195591 (main=3.114421, smooth=0.811703) | val=1.590193 (main=1.511546, smooth=0.786472) | lr=1.000000e-03 | time=105.19s
+[Epoch 381] train=3.181076 (main=3.099803, smooth=0.812724) | val=1.582741 (main=1.504261, smooth=0.784794) | lr=1.000000e-03 | time=108.94s
+[Epoch 382] train=3.194086 (main=3.112880, smooth=0.812056) | val=1.813057 (main=1.733980, smooth=0.790777) | lr=1.000000e-03 | time=122.37s
+[Epoch 383] train=3.184265 (main=3.102977, smooth=0.812874) | val=1.580428 (main=1.501906, smooth=0.785222) | lr=1.000000e-03 | time=120.41s
+[Epoch 384] train=3.188510 (main=3.107161, smooth=0.813497) | val=1.732629 (main=1.653980, smooth=0.786496) | lr=1.000000e-03 | time=122.95s
+[Epoch 385] train=3.170990 (main=3.089470, smooth=0.815196) | val=1.585135 (main=1.506361, smooth=0.787739) | lr=1.000000e-03 | time=122.88s
+[Epoch 386] train=3.213159 (main=3.131723, smooth=0.814358) | val=1.611094 (main=1.532404, smooth=0.786898) | lr=1.000000e-03 | time=127.35s
+[Epoch 387] train=3.210432 (main=3.129007, smooth=0.814250) | val=1.610868 (main=1.532225, smooth=0.786434) | lr=1.000000e-03 | time=113.90s
+[Epoch 388] train=3.206942 (main=3.125516, smooth=0.814253) | val=1.734763 (main=1.655954, smooth=0.788092) | lr=1.000000e-03 | time=122.62s
+[Epoch 389] train=3.208377 (main=3.126901, smooth=0.814761) | val=1.611420 (main=1.532819, smooth=0.786012) | lr=1.000000e-03 | time=118.56s
+[Epoch 390] train=3.206543 (main=3.125131, smooth=0.814116) | val=1.598275 (main=1.519379, smooth=0.788964) | lr=1.000000e-03 | time=124.75s
+[Epoch 391] train=3.210075 (main=3.128666, smooth=0.814089) | val=1.671236 (main=1.592620, smooth=0.786164) | lr=1.000000e-03 | time=107.59s
+[Epoch 392] train=3.210490 (main=3.129101, smooth=0.813889) | val=1.646048 (main=1.567451, smooth=0.785965) | lr=1.000000e-03 | time=123.59s
+[Epoch 393] train=3.197434 (main=3.116158, smooth=0.812752) | val=1.618337 (main=1.539974, smooth=0.783638) | lr=1.000000e-03 | time=122.12s
+[Epoch 394] train=3.193305 (main=3.111928, smooth=0.813772) | val=1.576265 (main=1.497455, smooth=0.788104) | lr=1.000000e-03 | time=124.11s
+[Epoch 395] train=3.198230 (main=3.116889, smooth=0.813413) | val=1.693073 (main=1.614624, smooth=0.784480) | lr=1.000000e-03 | time=116.59s
+[Epoch 396] train=3.200631 (main=3.119310, smooth=0.813213) | val=1.622266 (main=1.543757, smooth=0.785092) | lr=1.000000e-03 | time=118.48s
+[Epoch 397] train=3.220139 (main=3.138863, smooth=0.812759) | val=1.623127 (main=1.544741, smooth=0.783861) | lr=1.000000e-03 | time=115.30s
+[Epoch 398] train=3.202135 (main=3.120892, smooth=0.812426) | val=1.587394 (main=1.508787, smooth=0.786071) | lr=1.000000e-03 | time=121.98s
+[Epoch 399] train=3.254171 (main=3.172595, smooth=0.815755) | val=1.749605 (main=1.670808, smooth=0.787973) | lr=1.000000e-03 | time=126.58s
+[Epoch 400] train=3.238926 (main=3.157270, smooth=0.816563) | val=1.653106 (main=1.574333, smooth=0.787731) | lr=1.000000e-03 | time=133.64s
+[Epoch 401] train=3.230800 (main=3.149212, smooth=0.815878) | val=1.611360 (main=1.532700, smooth=0.786601) | lr=1.000000e-03 | time=122.73s
+[Epoch 402] train=3.239035 (main=3.157378, smooth=0.816572) | val=1.666071 (main=1.587485, smooth=0.785860) | lr=1.000000e-03 | time=123.46s
+[Epoch 403] train=3.218883 (main=3.137339, smooth=0.815438) | val=1.631041 (main=1.552388, smooth=0.786536) | lr=1.000000e-03 | time=116.08s
+[Epoch 404] train=3.200420 (main=3.119057, smooth=0.813629) | val=1.555938 (main=1.477458, smooth=0.784803) | lr=1.000000e-03 | time=127.89s
+[Epoch 405] train=3.221655 (main=3.140333, smooth=0.813215) | val=1.585503 (main=1.506865, smooth=0.786379) | lr=1.000000e-03 | time=130.97s
+[Epoch 406] train=3.206908 (main=3.125592, smooth=0.813152) | val=1.571866 (main=1.493243, smooth=0.786229) | lr=1.000000e-03 | time=110.53s
+[Epoch 407] train=3.199171 (main=3.117906, smooth=0.812650) | val=1.609089 (main=1.530561, smooth=0.785285) | lr=1.000000e-03 | time=116.73s
+[Epoch 408] train=3.193027 (main=3.111698, smooth=0.813291) | val=1.547356 (main=1.468580, smooth=0.787755) | lr=1.000000e-03 | time=115.30s
+[Epoch 409] train=3.188117 (main=3.106824, smooth=0.812937) | val=1.618218 (main=1.539254, smooth=0.789632) | lr=1.000000e-03 | time=124.99s
+[Epoch 410] train=3.187383 (main=3.106002, smooth=0.813813) | val=1.517583 (main=1.438892, smooth=0.786911) | lr=1.000000e-03 | time=118.00s
+[Epoch 411] train=3.258125 (main=3.176504, smooth=0.816204) | val=1.634477 (main=1.555677, smooth=0.788003) | lr=1.000000e-03 | time=120.60s
+[Epoch 412] train=3.218752 (main=3.137186, smooth=0.815658) | val=1.558662 (main=1.479680, smooth=0.789819) | lr=1.000000e-03 | time=107.38s
+[Epoch 413] train=3.186255 (main=3.104854, smooth=0.814003) | val=1.682007 (main=1.603161, smooth=0.788461) | lr=1.000000e-03 | time=120.97s
+[Epoch 414] train=3.203963 (main=3.122552, smooth=0.814105) | val=1.608679 (main=1.529529, smooth=0.791503) | lr=1.000000e-03 | time=121.53s
+[Epoch 415] train=3.210677 (main=3.129204, smooth=0.814732) | val=1.575064 (main=1.496302, smooth=0.787620) | lr=1.000000e-03 | time=125.86s
+[Epoch 416] train=3.241344 (main=3.159785, smooth=0.815588) | val=1.597989 (main=1.519039, smooth=0.789503) | lr=1.000000e-03 | time=114.64s
+[Epoch 417] train=3.217124 (main=3.135687, smooth=0.814370) | val=1.587259 (main=1.508580, smooth=0.786791) | lr=1.000000e-03 | time=122.78s
+[Epoch 418] train=3.177743 (main=3.096479, smooth=0.812638) | val=1.541825 (main=1.463331, smooth=0.784937) | lr=1.000000e-03 | time=111.70s
+[Epoch 419] train=3.201477 (main=3.120166, smooth=0.813104) | val=1.573136 (main=1.494713, smooth=0.784229) | lr=1.000000e-03 | time=107.54s
+[Epoch 420] train=3.200211 (main=3.118897, smooth=0.813141) | val=1.585030 (main=1.506494, smooth=0.785356) | lr=1.000000e-03 | time=119.20s
+[Epoch 421] train=3.188637 (main=3.107363, smooth=0.812734) | val=1.618814 (main=1.540201, smooth=0.786132) | lr=1.000000e-03 | time=129.84s
+[Epoch 422] train=3.205352 (main=3.124068, smooth=0.812838) | val=1.604961 (main=1.526348, smooth=0.786137) | lr=1.000000e-03 | time=115.72s
+[Epoch 423] train=3.185402 (main=3.104180, smooth=0.812220) | val=1.654638 (main=1.576081, smooth=0.785570) | lr=1.000000e-03 | time=113.29s
+[Epoch 424] train=3.183859 (main=3.102663, smooth=0.811964) | val=1.616943 (main=1.538501, smooth=0.784420) | lr=1.000000e-03 | time=121.31s
+[Epoch 425] train=3.208623 (main=3.127378, smooth=0.812455) | val=1.671591 (main=1.593221, smooth=0.783704) | lr=1.000000e-03 | time=127.34s
+[Epoch 426] train=3.230360 (main=3.148945, smooth=0.814155) | val=1.618259 (main=1.539628, smooth=0.786309) | lr=1.000000e-03 | time=112.20s
+[Epoch 427] train=3.232552 (main=3.151101, smooth=0.814510) | val=1.571648 (main=1.493087, smooth=0.785613) | lr=1.000000e-03 | time=106.15s
+[Epoch 428] train=3.207366 (main=3.126039, smooth=0.813272) | val=1.680243 (main=1.601905, smooth=0.783374) | lr=1.000000e-03 | time=120.41s
+[Epoch 429] train=3.201251 (main=3.120046, smooth=0.812044) | val=1.550311 (main=1.471777, smooth=0.785343) | lr=1.000000e-03 | time=121.72s
+[Epoch 430] train=3.206714 (main=3.125526, smooth=0.811874) | val=1.555835 (main=1.477331, smooth=0.785037) | lr=1.000000e-03 | time=110.37s
+[Epoch 431] train=3.194103 (main=3.112934, smooth=0.811687) | val=1.558096 (main=1.479806, smooth=0.782895) | lr=1.000000e-03 | time=107.00s
+[Epoch 432] train=3.194105 (main=3.112996, smooth=0.811093) | val=1.554095 (main=1.475721, smooth=0.783740) | lr=1.000000e-03 | time=118.06s
+[Epoch 433] train=3.192923 (main=3.111887, smooth=0.810363) | val=1.532075 (main=1.453644, smooth=0.784311) | lr=1.000000e-03 | time=111.61s
+[Epoch 434] train=3.162173 (main=3.081117, smooth=0.810558) | val=1.704780 (main=1.626513, smooth=0.782668) | lr=1.000000e-03 | time=117.71s
+[Epoch 435] train=3.195012 (main=3.114063, smooth=0.809485) | val=1.572186 (main=1.494269, smooth=0.779174) | lr=1.000000e-03 | time=115.47s
+[Epoch 436] train=3.175503 (main=3.094594, smooth=0.809086) | val=1.560359 (main=1.482002, smooth=0.783566) | lr=1.000000e-03 | time=120.23s
+[Epoch 437] train=3.200796 (main=3.119872, smooth=0.809240) | val=1.546070 (main=1.467839, smooth=0.782309) | lr=1.000000e-03 | time=123.64s
+[Epoch 438] train=3.201423 (main=3.120517, smooth=0.809055) | val=1.564616 (main=1.486210, smooth=0.784064) | lr=1.000000e-03 | time=119.50s
+[Epoch 439] train=3.210122 (main=3.129116, smooth=0.810064) | val=1.595794 (main=1.517489, smooth=0.783052) | lr=1.000000e-03 | time=118.95s
+[Epoch 440] train=3.201572 (main=3.120615, smooth=0.809571) | val=1.601674 (main=1.523377, smooth=0.782963) | lr=1.000000e-03 | time=103.89s
+[Epoch 441] train=3.191712 (main=3.110847, smooth=0.808646) | val=1.606839 (main=1.528450, smooth=0.783895) | lr=1.000000e-03 | time=119.43s
+[Epoch 442] train=3.200037 (main=3.119016, smooth=0.810211) | val=1.614665 (main=1.536488, smooth=0.781764) | lr=1.000000e-03 | time=125.23s
+[Epoch 443] train=3.232718 (main=3.151702, smooth=0.810163) | val=1.584360 (main=1.506016, smooth=0.783448) | lr=1.000000e-03 | time=127.25s
+[Epoch 444] train=3.245521 (main=3.164381, smooth=0.811405) | val=1.655567 (main=1.576879, smooth=0.786885) | lr=1.000000e-03 | time=130.44s
+[Epoch 445] train=3.241327 (main=3.159919, smooth=0.814081) | val=1.698693 (main=1.620204, smooth=0.784891) | lr=1.000000e-03 | time=117.15s
+[Epoch 446] train=3.226000 (main=3.144611, smooth=0.813886) | val=1.712581 (main=1.634043, smooth=0.785378) | lr=1.000000e-03 | time=111.58s
+[Epoch 447] train=3.228929 (main=3.147504, smooth=0.814244) | val=1.607714 (main=1.529293, smooth=0.784211) | lr=1.000000e-03 | time=119.19s
+[Epoch 448] train=3.217652 (main=3.136352, smooth=0.813007) | val=1.630344 (main=1.551700, smooth=0.786441) | lr=1.000000e-03 | time=118.23s
+[Epoch 449] train=3.212791 (main=3.131501, smooth=0.812902) | val=1.588294 (main=1.509504, smooth=0.787897) | lr=1.000000e-03 | time=121.58s
+[Epoch 450] train=3.213356 (main=3.131913, smooth=0.814430) | val=1.621877 (main=1.543191, smooth=0.786856) | lr=1.000000e-03 | time=124.25s
+[Epoch 451] train=3.204336 (main=3.122889, smooth=0.814473) | val=1.701436 (main=1.622871, smooth=0.785652) | lr=1.000000e-03 | time=108.13s
+[Epoch 452] train=3.218295 (main=3.136823, smooth=0.814716) | val=1.619456 (main=1.539846, smooth=0.796102) | lr=1.000000e-03 | time=116.00s
+[Epoch 453] train=3.198278 (main=3.116554, smooth=0.817243) | val=1.519782 (main=1.440549, smooth=0.792324) | lr=1.000000e-03 | time=118.07s
+[Epoch 454] train=3.216633 (main=3.135135, smooth=0.814988) | val=1.577339 (main=1.498615, smooth=0.787238) | lr=1.000000e-03 | time=122.57s
+[Epoch 455] train=3.200849 (main=3.119350, smooth=0.814987) | val=1.583693 (main=1.504959, smooth=0.787334) | lr=1.000000e-03 | time=122.13s
+[Epoch 456] train=3.196542 (main=3.115054, smooth=0.814887) | val=1.571976 (main=1.492886, smooth=0.790902) | lr=1.000000e-03 | time=121.44s
+[Epoch 457] train=3.206588 (main=3.125035, smooth=0.815530) | val=1.566856 (main=1.487789, smooth=0.790671) | lr=1.000000e-03 | time=125.68s
+[Epoch 458] train=3.214717 (main=3.133085, smooth=0.816319) | val=1.603231 (main=1.524269, smooth=0.789611) | lr=1.000000e-03 | time=116.60s
+[Epoch 459] train=3.213935 (main=3.132079, smooth=0.818559) | val=1.592174 (main=1.512842, smooth=0.793316) | lr=1.000000e-03 | time=132.02s
+[Epoch 460] train=3.204552 (main=3.122742, smooth=0.818099) | val=1.569968 (main=1.490865, smooth=0.791027) | lr=1.000000e-03 | time=125.40s
+[Epoch 461] train=3.205795 (main=3.123856, smooth=0.819395) | val=1.553020 (main=1.473355, smooth=0.796650) | lr=1.000000e-03 | time=127.01s
+[Epoch 462] train=3.205137 (main=3.123113, smooth=0.820234) | val=1.590011 (main=1.509044, smooth=0.809672) | lr=1.000000e-03 | time=125.03s
+[Epoch 463] train=3.197293 (main=3.115454, smooth=0.818390) | val=1.565395 (main=1.484834, smooth=0.805609) | lr=1.000000e-03 | time=123.44s
+[Epoch 464] train=3.189625 (main=3.107831, smooth=0.817940) | val=1.567515 (main=1.487882, smooth=0.796337) | lr=1.000000e-03 | time=121.21s
+[Epoch 465] train=3.195210 (main=3.113611, smooth=0.815990) | val=1.593532 (main=1.514024, smooth=0.795087) | lr=1.000000e-03 | time=130.29s
+[Epoch 466] train=3.193503 (main=3.111766, smooth=0.817375) | val=1.536910 (main=1.457644, smooth=0.792662) | lr=1.000000e-03 | time=107.34s
+[Epoch 467] train=3.182603 (main=3.101064, smooth=0.815388) | val=1.607152 (main=1.527866, smooth=0.792855) | lr=1.000000e-03 | time=87.44s
+[Epoch 468] train=3.199396 (main=3.117845, smooth=0.815503) | val=1.561820 (main=1.482469, smooth=0.793508) | lr=1.000000e-03 | time=85.36s
+[Epoch 469] train=3.197782 (main=3.116206, smooth=0.815760) | val=1.524112 (main=1.444362, smooth=0.797500) | lr=1.000000e-03 | time=83.14s
+[Epoch 470] train=3.195465 (main=3.113933, smooth=0.815323) | val=1.553882 (main=1.474136, smooth=0.797468) | lr=1.000000e-03 | time=86.90s
+[Epoch 471] train=3.190100 (main=3.108481, smooth=0.816184) | val=1.555562 (main=1.475995, smooth=0.795670) | lr=1.000000e-03 | time=85.42s
+[Epoch 472] train=3.193414 (main=3.111842, smooth=0.815724) | val=1.541820 (main=1.462895, smooth=0.789258) | lr=1.000000e-03 | time=84.86s
+[Epoch 473] train=3.199239 (main=3.117818, smooth=0.814212) | val=1.635407 (main=1.555921, smooth=0.794853) | lr=1.000000e-03 | time=89.07s
+[Epoch 474] train=3.196612 (main=3.115090, smooth=0.815223) | val=1.590384 (main=1.511409, smooth=0.789751) | lr=1.000000e-03 | time=84.78s
+[Epoch 475] train=3.203859 (main=3.122443, smooth=0.814158) | val=1.584009 (main=1.505033, smooth=0.789758) | lr=1.000000e-03 | time=86.34s
+[Epoch 476] train=3.215204 (main=3.133842, smooth=0.813619) | val=1.647699 (main=1.568569, smooth=0.791306) | lr=1.000000e-03 | time=87.34s
+[Epoch 477] train=3.222549 (main=3.141130, smooth=0.814190) | val=1.528648 (main=1.449328, smooth=0.793194) | lr=1.000000e-03 | time=88.35s
+[Epoch 478] train=3.229456 (main=3.147973, smooth=0.814827) | val=1.551247 (main=1.472362, smooth=0.788847) | lr=1.000000e-03 | time=89.86s
+[Epoch 479] train=3.204481 (main=3.123076, smooth=0.814054) | val=1.573130 (main=1.494019, smooth=0.791119) | lr=1.000000e-03 | time=89.62s
+[Epoch 480] train=3.207666 (main=3.126277, smooth=0.813897) | val=1.583489 (main=1.504424, smooth=0.790654) | lr=1.000000e-03 | time=87.01s
+[Epoch 481] train=3.192062 (main=3.110737, smooth=0.813252) | val=1.503660 (main=1.424718, smooth=0.789415) | lr=1.000000e-03 | time=86.22s
+[Epoch 482] train=3.197661 (main=3.116546, smooth=0.811151) | val=1.535669 (main=1.456361, smooth=0.793075) | lr=1.000000e-03 | time=85.94s
+[Epoch 483] train=3.178536 (main=3.097538, smooth=0.809974) | val=1.614096 (main=1.535126, smooth=0.789697) | lr=1.000000e-03 | time=86.81s
+[Epoch 484] train=3.243915 (main=3.162451, smooth=0.814632) | val=1.656530 (main=1.576932, smooth=0.795979) | lr=1.000000e-03 | time=86.95s
+[Epoch 485] train=3.206336 (main=3.125051, smooth=0.812858) | val=1.590222 (main=1.511078, smooth=0.791445) | lr=1.000000e-03 | time=94.27s
+[Epoch 486] train=3.199152 (main=3.117936, smooth=0.812161) | val=1.593830 (main=1.514456, smooth=0.793736) | lr=1.000000e-03 | time=95.50s
+[Epoch 487] train=3.201420 (main=3.120129, smooth=0.812905) | val=1.572715 (main=1.492696, smooth=0.800190) | lr=1.000000e-03 | time=92.73s
+[Epoch 488] train=3.172686 (main=3.091500, smooth=0.811867) | val=1.707787 (main=1.628243, smooth=0.795440) | lr=1.000000e-03 | time=92.49s
+[Epoch 489] train=3.196457 (main=3.115378, smooth=0.810794) | val=1.788071 (main=1.705621, smooth=0.824498) | lr=1.000000e-03 | time=90.48s
+[Epoch 490] train=3.195974 (main=3.114936, smooth=0.810379) | val=1.580151 (main=1.500501, smooth=0.796506) | lr=1.000000e-03 | time=89.31s
+[Epoch 491] train=3.190828 (main=3.109900, smooth=0.809280) | val=1.588763 (main=1.509375, smooth=0.793878) | lr=1.000000e-03 | time=91.33s
+[Epoch 492] train=3.183815 (main=3.102827, smooth=0.809875) | val=1.508183 (main=1.429462, smooth=0.787209) | lr=1.000000e-03 | time=91.64s
+[Epoch 493] train=3.188860 (main=3.108015, smooth=0.808453) | val=1.499143 (main=1.420302, smooth=0.788406) | lr=1.000000e-03 | time=93.60s
+[Epoch 494] train=3.194000 (main=3.113302, smooth=0.806977) | val=1.497265 (main=1.418146, smooth=0.791192) | lr=1.000000e-03 | time=95.42s
+[Epoch 495] train=3.192443 (main=3.111847, smooth=0.805959) | val=1.560798 (main=1.481453, smooth=0.793454) | lr=1.000000e-03 | time=94.97s
+[Epoch 496] train=3.180349 (main=3.099709, smooth=0.806393) | val=1.536114 (main=1.457232, smooth=0.788823) | lr=1.000000e-03 | time=91.19s
+[Epoch 497] train=3.183126 (main=3.102455, smooth=0.806710) | val=1.525091 (main=1.445883, smooth=0.792080) | lr=1.000000e-03 | time=88.23s
+[Epoch 498] train=3.197496 (main=3.116829, smooth=0.806679) | val=1.556070 (main=1.476684, smooth=0.793857) | lr=1.000000e-03 | time=73.26s
+[Epoch 499] train=3.185563 (main=3.104988, smooth=0.805749) | val=1.529241 (main=1.450280, smooth=0.789613) | lr=1.000000e-03 | time=64.03s
+[Epoch 500] train=3.175351 (main=3.094806, smooth=0.805454) | val=1.510242 (main=1.431459, smooth=0.787831) | lr=1.000000e-03 | time=65.01s
+[INFO] Best epoch=15, best_val_loss=1.376950
+[INFO] Test metrics | MAE=65.073616, RMSE=107.543640, R2=0.169020, MAPE=32.878349, valid_ratio=0.8903
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

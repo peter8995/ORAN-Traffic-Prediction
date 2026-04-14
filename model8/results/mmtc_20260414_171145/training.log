@@ -1,0 +1,67 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "mmtc",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 1,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 1,
+  "seed": 42,
+  "rnn_type": "lstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.05,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": true,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/mmtc_20260414_171145"
+}
+[INFO] Device: cuda
+[INFO] Slice=mmtc | train_csv=1916 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1533 val=383
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0563
+  - tx_brate: 0.8832
+  - rx_brate: 0.2665
+  - ul_sinr: 0.2494
+  - dl_mcs: 0.8809
+  - ul_mcs: 0.2494
+  - phr: 0.2497
+  - tx_pkts: 0.8832
+  - rx_pkts: 0.2928
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1714
+  - dl_n_samples: 0.8832
+  - ul_n_samples: 0.2928
+[INFO] Windows | train=3064217 val=769522 test=140979
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.050000, effective=0.050000, target_iqr=51.000000, multiplier=1.000000, scale_aware=off
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[Epoch 001] train=14.997124 (main=14.953661, smooth=0.869265) | val=4.706854 (main=4.663173, smooth=0.873615) | lr=0.000000e+00 | time=46.01s
+[INFO] Saved new best checkpoint at epoch 1.
+[INFO] Best epoch=1, best_val_loss=4.706854
+[INFO] Test metrics | MAE=29.770727, RMSE=44.105564, R2=0.164119, MAPE=40.310432, valid_ratio=0.8929
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

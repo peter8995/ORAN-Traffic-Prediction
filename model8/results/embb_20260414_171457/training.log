@@ -1,0 +1,67 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "embb",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 1,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 1,
+  "seed": 42,
+  "rnn_type": "lstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.05,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": true,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/embb_20260414_171457"
+}
+[INFO] Device: cuda
+[INFO] Slice=embb | train_csv=1904 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1524 val=380
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.8424
+  - tx_brate: 0.8832
+  - rx_brate: 0.3669
+  - ul_sinr: 0.3018
+  - dl_mcs: 0.8829
+  - ul_mcs: 0.3018
+  - phr: 0.3442
+  - tx_pkts: 0.8832
+  - rx_pkts: 0.3880
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.2515
+  - dl_n_samples: 0.8832
+  - ul_n_samples: 0.3880
+[INFO] Windows | train=3062452 val=761927 test=141381
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.050000, effective=0.050000, target_iqr=2574.000000, multiplier=1.000000, scale_aware=off
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[Epoch 001] train=0.025561 (main=0.021192, smooth=0.087396) | val=0.015620 (main=0.012377, smooth=0.064857) | lr=0.000000e+00 | time=46.77s
+[INFO] Saved new best checkpoint at epoch 1.
+[INFO] Best epoch=1, best_val_loss=0.015620
+[INFO] Test metrics | MAE=63.684036, RMSE=86.376122, R2=0.958498, MAPE=17.394436, valid_ratio=0.8937
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.
