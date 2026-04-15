@@ -90,6 +90,31 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--lambda_smooth", type=float, default=0.1)
     parser.add_argument(
+        "--loss_type",
+        type=str,
+        choices=["mse", "weighted_mse"],
+        default="mse",
+        help="Main regression loss. 'weighted_mse' up-weights samples with target above quantile.",
+    )
+    parser.add_argument(
+        "--weight_alpha",
+        type=float,
+        default=4.0,
+        help="Max extra weight added above the quantile threshold (weight in [1, 1+alpha]).",
+    )
+    parser.add_argument(
+        "--weight_quantile",
+        type=float,
+        default=0.9,
+        help="Target quantile (computed on train set, scaled space) above which weights start to ramp up.",
+    )
+    parser.add_argument(
+        "--weight_upper_quantile",
+        type=float,
+        default=0.99,
+        help="Upper quantile defining the ramp span; weight saturates at 1+alpha from this point.",
+    )
+    parser.add_argument(
         "--lambda_ref_iqr",
         type=float,
         default=104.0,
@@ -102,7 +127,18 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--device", type=str, default="auto")
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    if args.weight_alpha < 0:
+        parser.error("--weight_alpha must be >= 0.")
+    if not (0.0 <= args.weight_quantile <= 1.0):
+        parser.error("--weight_quantile must be in [0, 1].")
+    if not (0.0 <= args.weight_upper_quantile <= 1.0):
+        parser.error("--weight_upper_quantile must be in [0, 1].")
+    if args.weight_quantile >= args.weight_upper_quantile:
+        parser.error("--weight_quantile must be < --weight_upper_quantile.")
+
+    return args
 
 
 def set_seed(seed: int) -> None:
@@ -172,11 +208,47 @@ def resolve_lambda_smooth(
     }
 
 
+class WeightedMSELoss(nn.Module):
+    """Linear-ramp weighted MSE.
+
+    weight(y) = 1 + alpha * clamp((y - q_low) / (q_high - q_low), 0, 1)
+    so samples at/below q_low get weight 1 and samples at/above q_high get 1+alpha.
+    Thresholds are expressed in the same (scaled) space as the model targets.
+    """
+
+    def __init__(self, q_low: float, q_high: float, alpha: float) -> None:
+        super().__init__()
+        span = max(float(q_high - q_low), 1e-8)
+        self.register_buffer("q_low", torch.tensor(float(q_low)))
+        self.register_buffer("span", torch.tensor(span))
+        self.alpha = float(alpha)
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        ramp = torch.clamp((target - self.q_low) / self.span, min=0.0, max=1.0)
+        weight = 1.0 + self.alpha * ramp
+        se = (pred - target) ** 2
+        return (weight * se).mean()
+
+
+def collect_train_target_quantiles(
+    loader: DataLoader, q_low: float, q_high: float
+) -> Tuple[float, float]:
+    buf: List[np.ndarray] = []
+    for _, y, _ in loader:
+        buf.append(y.reshape(-1).numpy())
+    flat = np.concatenate(buf, axis=0) if buf else np.array([0.0], dtype=np.float32)
+    lo = float(np.quantile(flat, q_low))
+    hi = float(np.quantile(flat, q_high))
+    if hi <= lo:
+        hi = lo + 1e-6
+    return lo, hi
+
+
 def run_epoch(
     model: nn.Module,
     loader: DataLoader,
     device: torch.device,
-    mse_loss: nn.Module,
+    main_loss_fn: nn.Module,
     lambda_smooth: float,
     optimizer: torch.optim.Optimizer | None = None,
 ) -> Dict[str, float]:
@@ -197,7 +269,7 @@ def run_epoch(
             optimizer.zero_grad(set_to_none=True)
 
         pred = model(x)
-        main_loss = mse_loss(pred, y)
+        main_loss = main_loss_fn(pred, y)
         smooth_loss = smooth_consistency_loss(pred, y, chunk_start)
         total_loss = main_loss + lambda_smooth * smooth_loss
 
@@ -609,7 +681,22 @@ def main_train(args: argparse.Namespace, output_dir: Path) -> None:
     if args.scheduler == "cosine":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
-    mse_loss = nn.MSELoss()
+    if args.loss_type == "weighted_mse":
+        q_low, q_high = collect_train_target_quantiles(
+            train_loader, args.weight_quantile, args.weight_upper_quantile
+        )
+        main_loss_fn = WeightedMSELoss(
+            q_low=q_low, q_high=q_high, alpha=args.weight_alpha
+        ).to(device)
+        print(
+            "[INFO] weighted_mse | "
+            f"q_low(q{args.weight_quantile:.2f})={q_low:.6f}, "
+            f"q_high(q{args.weight_upper_quantile:.2f})={q_high:.6f}, "
+            f"alpha={args.weight_alpha:.2f} (weight in [1, {1 + args.weight_alpha:.2f}])"
+        )
+    else:
+        main_loss_fn = nn.MSELoss()
+        print("[INFO] loss_type=mse (unweighted)")
     history: List[Dict[str, float]] = []
 
     best_val = float("inf")
@@ -626,7 +713,7 @@ def main_train(args: argparse.Namespace, output_dir: Path) -> None:
             model=model,
             loader=train_loader,
             device=device,
-            mse_loss=mse_loss,
+            main_loss_fn=main_loss_fn,
             lambda_smooth=lambda_smooth_eff,
             optimizer=optimizer,
         )
@@ -634,7 +721,7 @@ def main_train(args: argparse.Namespace, output_dir: Path) -> None:
             model=model,
             loader=val_loader,
             device=device,
-            mse_loss=mse_loss,
+            main_loss_fn=main_loss_fn,
             lambda_smooth=lambda_smooth_eff,
             optimizer=None,
         )

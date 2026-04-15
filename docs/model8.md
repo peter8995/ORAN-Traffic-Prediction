@@ -64,6 +64,62 @@ python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
 4. **patience=0 代表關閉 early stopping**（train.py:677）
    - `--patience` 預設 50；設為 `0` 時 early stopping 邏輯完全跳過，跑滿 `--epochs`
 
+## 第二輪結果 (2026-04-14)
+
+| Slice | best_epoch | Test MAE | Test R² |
+|-------|-----------|----------|---------|
+| embb  | 1  | 52.66 | **0.9672** |
+| mmtc  | 27 | 29.43 | **0.1450** |
+| urllc | 15 | 64.21 | **0.2193** |
+
+**關鍵觀察：**
+- embb 第 1 epoch 就收斂，cosine 後續 499 epoch 無效
+- mmtc/urllc 在 ~15-27 epoch 後 val_main 單調爬升 → overfit
+- 三 slice 全部 **mean regression**（低值過高估、高值過低估）
+  - mmtc high-tail (true≥138)：`neg_ratio=0.981`, mean_resid≈-85
+  - urllc high-tail (true≥321)：`neg_ratio=0.993`, mean_resid≈-215
+  - embb low-tail mean_resid≈+17.8；high-tail mean_resid≈-32.0, neg_ratio=0.925
+
+## 第三輪改動（2026-04-15，待跑）
+
+### Weighted MSE Loss（train.py）
+對 target 尾端樣本加權，直接對抗 mean regression：
+
+```
+weight(y) = 1 + α × clamp((y - q_low) / (q_high - q_low), 0, 1)
+```
+- `y ≤ q_low` → weight=1
+- `y ≥ q_high` → weight=1+α（預設 α=4，即上限 5）
+- q_low/q_high 在 **scaled space** 由 train_loader 一次 pass 算出，per-slice 自適應
+- 實作：`WeightedMSELoss` (train.py:177) + `collect_train_target_quantiles` (train.py:196)
+
+### 新 CLI 參數
+| 參數 | 預設 | 說明 |
+|------|------|------|
+| `--loss_type` | `mse` | `mse` / `weighted_mse` |
+| `--weight_alpha` | `4.0` | 最大額外權重，必須 ≥ 0 |
+| `--weight_quantile` | `0.9` | ramp 起點分位數 |
+| `--weight_upper_quantile` | `0.99` | ramp 飽和分位數 |
+
+argparse 會驗證：`0 ≤ q_low < q_high ≤ 1` 且 `alpha ≥ 0`。
+
+### 建議試跑命令
+
+```bash
+# mmtc / urllc：短 epoch + dropout↑ + 單向 LSTM + 低 smooth + weighted loss
+python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+  --epochs 80 --patience 20 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type lstm --lstm_dropout 0.35 \
+  --lambda_smooth 0.03 --disable_scale_aware_lambda \
+  --loss_type weighted_mse --weight_alpha 4
+
+# embb：已收斂，只調細節
+python train.py ... --slice_type embb --epochs 30 --patience 10 \
+  --learning_rate 5e-5 --loss_type weighted_mse --weight_alpha 2
+```
+
 ## 尚未解決
-- `T_max=args.epochs` 若 early stop 較早觸發，cosine 衰減幾乎不生效 → 可能需縮小 T_max
-- 第二輪三 slice 結果待跑驗證
+- `T_max=args.epochs` 若 early stop 較早觸發，cosine 衰減幾乎不生效 → 第三輪改用較短 `--epochs`
+- Weighted MSE 的 α / quantile 最佳值待調參
+- 若 weighted loss 仍無法解決 mmtc/urllc 收縮，下一步考慮 `sequence_length 15→30` 或加 target rolling stats 特徵
