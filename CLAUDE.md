@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-O-RAN traffic prediction using ViT + LSTM/BiLSTM architectures for 5G network slice types (eMBB, mMTC, uRLLC). Nine model directories exist (model1–model7, model7_1, model8).
+O-RAN traffic prediction using ViT + LSTM/BiLSTM architectures for 5G network slice types (eMBB, mMTC, uRLLC). Ten model directories exist (model1–model7, model7_1, model8, model8_1).
 
-**Current focus**: model8（regression-first 重設計），目標解決 mMTC/uRLLC R²≈0.4 瓶頸。
+**Current focus**: model8_1（Transformer ablation），比較有無 Transformer 對三個 slice 的影響。
 
 ## 詳細文件 (docs/)
 
@@ -15,8 +15,9 @@ O-RAN traffic prediction using ViT + LSTM/BiLSTM architectures for 5G network sl
 | Model5/6/7 spike-aware 歷史、Tiny ViT 細節、model6 改進計畫、model7 三輪實驗結果 | `docs/model5_6_7_history.md` |
 | model7_1 regression-only ablation 完整結果（證實 spike head 無幫助；mMTC/uRLLC 瓶頸根因分析） | `docs/model7_1_ablation.md` |
 | model_detect_peak — Autoencoder / Isolation Forest baselines、spike label 診斷、方案 B 結果 | `docs/model_detect_peak.md` |
-| model8 regression-first 重設計進度、第一輪 bug 診斷、第二輪修復內容 | `docs/model8.md` |
+| model8 regression-first 重設計進度、三輪實驗結果與 weighted MSE 分析 | `docs/model8.md` |
 | model8 完整設計與 Decision Log | `model8/DESIGN.md` |
+| model8_1 Transformer ablation 設計與 decision log | `docs/model8_1.md` |
 
 ## Architecture（models 1-7 共通）
 
@@ -45,6 +46,7 @@ Forward pass (model7/7_1): 同上但 ViT 換成 TinyViT，輸出 `(B, seq_len+1,
 | model7 | **Tiny ViT**: custom `nn.TransformerEncoder` (~1M params) replaces vit_b_16 (86M) |
 | model7_1 | **Regression-only ablation**: model7 minus spike_head. 證實 spike head 無助於 regression |
 | model8 | **Regression-first redesign**: RobustScaler, chunk shuffle sampler, smooth loss, per-CSV val split |
+| model8_1 | **Transformer ablation**: model8 minus TransformerEncoder, pure LSTM baseline for comparison |
 
 ## Training Commands
 
@@ -75,15 +77,25 @@ python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
 ```
 細節見 `docs/model8.md`。
 
+### model8_1
+```bash
+cd model8_1
+python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+  --epochs 500 --patience 0 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.05
+```
+和 model8 完全相同設定，唯一差異是 model.py 移除了 TransformerEncoder。細節見 `docs/model8_1.md`。
+
 ## Datasets
 
 - **TRACTOR**: `Dataset/Tractor/Trial{5,7}/` — used by models 1-3
 - **Colosseum**: `Dataset/colosseum-oran-coloran-dataset/tr{N}/exp{}/bs{}/{embb|mtc|urllc}/*metrics.csv` — used by models 4-8
 
 11 input features (model1-7)：dl_buffer, ul_buffer, tx/rx brate, ul_sinr, dl/ul_mcs, phr, tx/rx_pkts, ul_rssi
-13 input features (model8)：上述扣掉 `ul_rssi` / `ul_buffer`，加上 `dl_cqi`, `rx_errors_ul`, `dl_n_samples`, `ul_n_samples`
+13 input features (model8/8_1)：上述扣掉 `ul_rssi` / `ul_buffer`，加上 `dl_cqi`, `rx_errors_ul`, `dl_n_samples`, `ul_n_samples`
 
-Target：`sum_requested_prbs`（model1-7_1）/ `sum_granted_prbs`（model5, model8）
+Target：`sum_requested_prbs`（model1-7_1）/ `sum_granted_prbs`（model5, model8/8_1）
 
 Note：`mmtc` slice type → 資料夾名稱 `mtc`。
 

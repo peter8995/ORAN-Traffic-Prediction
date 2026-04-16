@@ -119,7 +119,35 @@ python train.py ... --slice_type embb --epochs 30 --patience 10 \
   --learning_rate 5e-5 --loss_type weighted_mse --weight_alpha 2
 ```
 
+## 第三輪結果 (2026-04-15)
+
+**Config 差異**：
+- embb: `loss_type=mse`（未改）, lr=5e-5, cosine, epochs=80, patience=0
+- mmtc/urllc: `loss_type=weighted_mse` α=4, scheduler=none, lstm, dropout=0.3, lambda_smooth=0.03, disable_scale_aware_lambda, patience=0
+
+| Slice | best_epoch | Test MAE | Test R² | vs Round 2 |
+|-------|-----------|----------|---------|------------|
+| embb  | 2  | 52.39 | **0.9673** | 持平 |
+| mmtc  | 34 | 32.53 | **0.1265** | R² -13% |
+| urllc | 49 | 78.48 | **0.0873** | R² -60% |
+
+**Weighted MSE 細部分析（非全面失敗）**：
+- weighted_mse 改善了高流量低估，但惡化了低流量高估：
+  - mmtc top10% bias: -85→-65（改善）, bottom10% bias: +17→+27（惡化）
+  - urllc top10% bias: -215→-148（改善）, bottom10% bias: +32→+51（惡化）
+- 整體 R²/MAE 變差的主因是 bulk 區間被拉壞
+- train_loss >> val_loss 是可預期現象（train/val target 分布不同 + 加權放大差距），非崩潰證據
+
+**配置問題**：
+- α=4 過重 + scheduler=none + patience=0（無 early stop）→ 高噪聲梯度下 bulk 偏差被推向整體偏正
+- embb 本輪未使用 weighted_mse，等於只是短 epoch 重跑
+
+**結論**：
+- embb 已穩定，維持 mse
+- mmtc/urllc 本輪配置不佳；weighted loss 概念有效（改善 tail），但需降 α + 加 scheduler + early stop
+- 特徵資訊不足是中長期瓶頸
+
 ## 尚未解決
-- `T_max=args.epochs` 若 early stop 較早觸發，cosine 衰減幾乎不生效 → 第三輪改用較短 `--epochs`
-- Weighted MSE 的 α / quantile 最佳值待調參
-- 若 weighted loss 仍無法解決 mmtc/urllc 收縮，下一步考慮 `sequence_length 15→30` 或加 target rolling stats 特徵
+- Weighted MSE 方向正確（改善 tail bias）但 α=4 過重，需調降 + 搭配 scheduler/early stop
+- 特徵資訊不足是 mmtc/urllc 的中長期瓶頸（13 維 input 無法區分 spike context）
+- 下一步：model8_1 ablation（移除 Transformer，純 LSTM）驗證 Transformer 是否對 mmtc/urllc 有幫助

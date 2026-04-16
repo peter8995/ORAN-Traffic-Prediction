@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
         / "colosseum-oran-coloran-dataset"
     )
 
-    parser = argparse.ArgumentParser(description="model8 training script")
+    parser = argparse.ArgumentParser(description="model8_1 training script")
 
     parser.add_argument("--data_root", type=str, default=str(default_data_root))
     parser.add_argument("--train_dirs", nargs="+", required=True)
@@ -589,6 +589,10 @@ def main_train(args: argparse.Namespace, output_dir: Path) -> None:
     set_seed(args.seed)
     device = resolve_device(args.device)
     print(f"[INFO] Device: {device}")
+    print(
+        "[INFO] model8_1 uses RNN-only architecture: "
+        "--n_heads/--n_layers/--dim_feedforward/--vit_dropout are ignored."
+    )
 
     data_processor = DataProcessor(
         data_root=args.data_root,

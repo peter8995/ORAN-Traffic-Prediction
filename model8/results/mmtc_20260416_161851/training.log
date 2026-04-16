@@ -1,0 +1,80 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "mmtc",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 80,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 20,
+  "seed": 42,
+  "rnn_type": "lstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.3,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.3,
+  "lambda_smooth": 0.03,
+  "loss_type": "weighted_mse",
+  "weight_alpha": 1.5,
+  "weight_quantile": 0.9,
+  "weight_upper_quantile": 0.99,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": true,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/mmtc_20260416_161851"
+}
+[INFO] Device: cuda
+[INFO] Slice=mmtc | train_csv=1916 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1533 val=383
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0563
+  - tx_brate: 0.8832
+  - rx_brate: 0.2665
+  - ul_sinr: 0.2494
+  - dl_mcs: 0.8809
+  - ul_mcs: 0.2494
+  - phr: 0.2497
+  - tx_pkts: 0.8832
+  - rx_pkts: 0.2928
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1714
+  - dl_n_samples: 0.8832
+  - ul_n_samples: 0.2928
+[INFO] Windows | train=3064217 val=769522 test=140979
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.030000, effective=0.030000, target_iqr=51.000000, multiplier=1.000000, scale_aware=off
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[INFO] weighted_mse | q_low(q0.90)=1.411765, q_high(q0.99)=5.117647, alpha=1.50 (weight in [1, 2.50])
+[Epoch 001] train=36.348387 (main=36.321628, smooth=0.891977) | val=68.513809 (main=68.487394, smooth=0.880458) | lr=9.996145e-05 | time=91.56s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=42.318868 (main=42.291277, smooth=0.919691) | val=12.091743 (main=12.065187, smooth=0.885230) | lr=9.984587e-05 | time=103.78s
+[INFO] Saved new best checkpoint at epoch 2.
+[Epoch 003] train=24.441627 (main=24.414036, smooth=0.919717) | val=12.584439 (main=12.558041, smooth=0.879952) | lr=9.965342e-05 | time=107.83s
+[Epoch 004] train=25.351409 (main=25.324131, smooth=0.909285) | val=10.505464 (main=10.479040, smooth=0.880778) | lr=9.938442e-05 | time=102.98s
+[INFO] Saved new best checkpoint at epoch 4.
+[Epoch 005] train=23.595604 (main=23.568473, smooth=0.904358) | val=9.829049 (main=9.802467, smooth=0.886089) | lr=9.903926e-05 | time=104.48s
+[INFO] Saved new best checkpoint at epoch 5.
+[Epoch 006] train=23.607454 (main=23.580418, smooth=0.901192) | val=9.153094 (main=9.126811, smooth=0.876122) | lr=9.861850e-05 | time=101.05s
+[INFO] Saved new best checkpoint at epoch 6.
+[Epoch 007] train=22.944651 (main=22.917651, smooth=0.899993) | val=46.065812 (main=46.039371, smooth=0.881386) | lr=9.812276e-05 | time=102.70s
+[Epoch 008] train=26.394112 (main=26.366810, smooth=0.910055) | val=10.259254 (main=10.232817, smooth=0.881210) | lr=9.755283e-05 | time=104.77s
+[Epoch 009] train=23.888466 (main=23.861270, smooth=0.906529) | val=11.183290 (main=11.156932, smooth=0.878606) | lr=9.690957e-05 | time=103.34s
