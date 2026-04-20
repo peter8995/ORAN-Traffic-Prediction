@@ -1,0 +1,150 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr1-27"
+  ],
+  "test_dirs": [
+    "tr0"
+  ],
+  "slice_type": "mmtc",
+  "val_split": 0.2,
+  "sequence_length": 60,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 100,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 50,
+  "seed": 42,
+  "rnn_type": "lstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.3,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.3,
+  "lambda_smooth": 0.03,
+  "loss_type": "weighted_mse",
+  "weight_alpha": 1.5,
+  "weight_quantile": 0.9,
+  "weight_upper_quantile": 0.99,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": true,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/mmtc_20260417_143442"
+}
+[INFO] Device: cuda
+[INFO] Slice=mmtc | train_csv=1916 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1533 val=383
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0619
+  - tx_brate: 0.8830
+  - rx_brate: 0.2678
+  - ul_sinr: 0.2498
+  - dl_mcs: 0.8809
+  - ul_mcs: 0.2498
+  - phr: 0.2508
+  - tx_pkts: 0.8830
+  - rx_pkts: 0.2937
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1719
+  - dl_n_samples: 0.8830
+  - ul_n_samples: 0.2937
+[INFO] Windows | train=2998154 val=756458 test=131342
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.030000, effective=0.030000, target_iqr=54.000000, multiplier=1.000000, scale_aware=off
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[INFO] weighted_mse | q_low(q0.90)=1.333333, q_high(q0.99)=4.944445, alpha=1.50 (weight in [1, 2.50])
+[Epoch 001] train=22.716376 (main=22.690951, smooth=0.847521) | val=7.324761 (main=7.300087, smooth=0.822465) | lr=9.997533e-05 | time=90.15s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=15.534843 (main=15.509183, smooth=0.855335) | val=6.715630 (main=6.690935, smooth=0.823146) | lr=9.990134e-05 | time=91.95s
+[INFO] Saved new best checkpoint at epoch 2.
+[Epoch 003] train=28.681811 (main=28.656099, smooth=0.857081) | val=8.326912 (main=8.302159, smooth=0.825098) | lr=9.977810e-05 | time=91.09s
+[Epoch 004] train=16.957179 (main=16.931067, smooth=0.870406) | val=6.576652 (main=6.552051, smooth=0.820015) | lr=9.960574e-05 | time=91.31s
+[INFO] Saved new best checkpoint at epoch 4.
+[Epoch 005] train=13.816088 (main=13.790077, smooth=0.867026) | val=7.581605 (main=7.557011, smooth=0.819828) | lr=9.938442e-05 | time=91.75s
+[Epoch 006] train=13.839861 (main=13.813905, smooth=0.865206) | val=7.535829 (main=7.511020, smooth=0.826958) | lr=9.911436e-05 | time=91.78s
+[Epoch 007] train=13.935090 (main=13.909182, smooth=0.863595) | val=7.081654 (main=7.056949, smooth=0.823511) | lr=9.879584e-05 | time=92.26s
+[Epoch 008] train=12.878937 (main=12.853181, smooth=0.858529) | val=12.808458 (main=12.783828, smooth=0.820994) | lr=9.842916e-05 | time=91.73s
+[Epoch 009] train=15.997356 (main=15.971550, smooth=0.860208) | val=6.611635 (main=6.586975, smooth=0.822009) | lr=9.801468e-05 | time=92.16s
+[Epoch 010] train=15.435980 (main=15.410426, smooth=0.851791) | val=6.731145 (main=6.706537, smooth=0.820262) | lr=9.755283e-05 | time=91.40s
+[Epoch 011] train=14.119909 (main=14.094267, smooth=0.854729) | val=7.160909 (main=7.136289, smooth=0.820657) | lr=9.704404e-05 | time=93.49s
+[Epoch 012] train=15.864030 (main=15.838275, smooth=0.858487) | val=6.136456 (main=6.111857, smooth=0.819972) | lr=9.648882e-05 | time=93.88s
+[INFO] Saved new best checkpoint at epoch 12.
+[Epoch 013] train=14.456997 (main=14.431449, smooth=0.851576) | val=6.206730 (main=6.182088, smooth=0.821412) | lr=9.588773e-05 | time=212.52s
+[Epoch 014] train=13.324371 (main=13.298915, smooth=0.848510) | val=6.323262 (main=6.298656, smooth=0.820175) | lr=9.524135e-05 | time=227.55s
+[Epoch 015] train=14.620407 (main=14.594856, smooth=0.851707) | val=6.730908 (main=6.706215, smooth=0.823094) | lr=9.455033e-05 | time=227.03s
+[Epoch 016] train=13.920224 (main=13.894743, smooth=0.849378) | val=7.771608 (main=7.746954, smooth=0.821793) | lr=9.381533e-05 | time=221.02s
+[Epoch 017] train=13.788019 (main=13.762627, smooth=0.846405) | val=6.880838 (main=6.856152, smooth=0.822857) | lr=9.303710e-05 | time=219.49s
+[Epoch 018] train=12.991467 (main=12.966017, smooth=0.848347) | val=7.759845 (main=7.735203, smooth=0.821402) | lr=9.221640e-05 | time=221.91s
+[Epoch 019] train=13.854052 (main=13.828694, smooth=0.845247) | val=6.667110 (main=6.642446, smooth=0.822106) | lr=9.135403e-05 | time=228.05s
+[Epoch 020] train=13.216620 (main=13.191378, smooth=0.841392) | val=6.964168 (main=6.939466, smooth=0.823408) | lr=9.045085e-05 | time=236.48s
+[Epoch 021] train=12.783881 (main=12.758701, smooth=0.839327) | val=7.286423 (main=7.261823, smooth=0.820019) | lr=8.950775e-05 | time=229.68s
+[Epoch 022] train=13.311584 (main=13.286394, smooth=0.839658) | val=6.789562 (main=6.764914, smooth=0.821610) | lr=8.852566e-05 | time=226.85s
+[Epoch 023] train=14.006675 (main=13.981442, smooth=0.841107) | val=7.398603 (main=7.373925, smooth=0.822586) | lr=8.750555e-05 | time=223.36s
+[Epoch 024] train=13.153752 (main=13.128505, smooth=0.841561) | val=6.093463 (main=6.068830, smooth=0.821104) | lr=8.644843e-05 | time=235.07s
+[INFO] Saved new best checkpoint at epoch 24.
+[Epoch 025] train=13.284128 (main=13.258954, smooth=0.839124) | val=6.807778 (main=6.783064, smooth=0.823805) | lr=8.535534e-05 | time=231.78s
+[Epoch 026] train=13.235080 (main=13.209859, smooth=0.840703) | val=6.608316 (main=6.583600, smooth=0.823877) | lr=8.422736e-05 | time=237.16s
+[Epoch 027] train=12.953085 (main=12.927911, smooth=0.839129) | val=6.351129 (main=6.326476, smooth=0.821780) | lr=8.306559e-05 | time=233.04s
+[Epoch 028] train=13.022576 (main=12.997461, smooth=0.837174) | val=6.824473 (main=6.799822, smooth=0.821688) | lr=8.187120e-05 | time=235.96s
+[Epoch 029] train=13.009368 (main=12.984233, smooth=0.837856) | val=7.039179 (main=7.014487, smooth=0.823085) | lr=8.064535e-05 | time=229.05s
+[Epoch 030] train=12.900902 (main=12.875779, smooth=0.837425) | val=6.457024 (main=6.432335, smooth=0.822953) | lr=7.938926e-05 | time=235.82s
+[Epoch 031] train=12.912617 (main=12.887521, smooth=0.836535) | val=7.579821 (main=7.555181, smooth=0.821334) | lr=7.810417e-05 | time=226.66s
+[Epoch 032] train=12.868546 (main=12.843407, smooth=0.837965) | val=6.337162 (main=6.312478, smooth=0.822802) | lr=7.679134e-05 | time=236.87s
+[Epoch 033] train=12.596557 (main=12.571457, smooth=0.836652) | val=7.090046 (main=7.065391, smooth=0.821833) | lr=7.545207e-05 | time=229.02s
+[Epoch 034] train=12.493900 (main=12.468812, smooth=0.836253) | val=7.546665 (main=7.521986, smooth=0.822616) | lr=7.408768e-05 | time=228.73s
+[Epoch 035] train=12.713616 (main=12.688536, smooth=0.835999) | val=7.119419 (main=7.094782, smooth=0.821226) | lr=7.269952e-05 | time=234.50s
+[Epoch 036] train=12.209087 (main=12.184047, smooth=0.834657) | val=6.993997 (main=6.969389, smooth=0.820290) | lr=7.128896e-05 | time=234.01s
+[Epoch 037] train=12.708895 (main=12.683842, smooth=0.835127) | val=6.830520 (main=6.805885, smooth=0.821164) | lr=6.985739e-05 | time=230.34s
+[Epoch 038] train=12.083161 (main=12.058093, smooth=0.835572) | val=6.153613 (main=6.128934, smooth=0.822612) | lr=6.840623e-05 | time=233.83s
+[Epoch 039] train=12.639930 (main=12.614877, smooth=0.835087) | val=6.181060 (main=6.156398, smooth=0.822080) | lr=6.693690e-05 | time=222.12s
+[Epoch 040] train=12.475265 (main=12.450269, smooth=0.833212) | val=7.004874 (main=6.980230, smooth=0.821435) | lr=6.545085e-05 | time=231.94s
+[Epoch 041] train=12.258292 (main=12.233265, smooth=0.834228) | val=6.718417 (main=6.693775, smooth=0.821400) | lr=6.394956e-05 | time=233.64s
+[Epoch 042] train=12.219607 (main=12.194562, smooth=0.834824) | val=6.663177 (main=6.638521, smooth=0.821838) | lr=6.243449e-05 | time=235.40s
+[Epoch 043] train=12.465833 (main=12.440798, smooth=0.834481) | val=6.766094 (main=6.741445, smooth=0.821627) | lr=6.090716e-05 | time=228.38s
+[Epoch 044] train=12.215829 (main=12.190787, smooth=0.834751) | val=6.562182 (main=6.537505, smooth=0.822576) | lr=5.936907e-05 | time=231.59s
+[Epoch 045] train=12.283038 (main=12.257981, smooth=0.835235) | val=7.434630 (main=7.409928, smooth=0.823382) | lr=5.782172e-05 | time=234.63s
+[Epoch 046] train=12.309883 (main=12.284862, smooth=0.834016) | val=7.291340 (main=7.266718, smooth=0.820704) | lr=5.626666e-05 | time=228.76s
+[Epoch 047] train=12.219972 (main=12.195011, smooth=0.832045) | val=7.222432 (main=7.197801, smooth=0.821041) | lr=5.470542e-05 | time=230.61s
+[Epoch 048] train=12.106511 (main=12.081519, smooth=0.833040) | val=6.412320 (main=6.387686, smooth=0.821141) | lr=5.313953e-05 | time=232.14s
+[Epoch 049] train=12.154510 (main=12.129540, smooth=0.832320) | val=7.249648 (main=7.225000, smooth=0.821600) | lr=5.157054e-05 | time=231.45s
+[Epoch 050] train=12.203878 (main=12.178925, smooth=0.831767) | val=7.221219 (main=7.196612, smooth=0.820242) | lr=5.000000e-05 | time=229.53s
+[Epoch 051] train=12.158470 (main=12.133517, smooth=0.831756) | val=6.691001 (main=6.666368, smooth=0.821109) | lr=4.842946e-05 | time=231.13s
+[Epoch 052] train=12.106913 (main=12.081971, smooth=0.831411) | val=7.273367 (main=7.248773, smooth=0.819810) | lr=4.686047e-05 | time=234.28s
+[Epoch 053] train=12.078086 (main=12.053159, smooth=0.830905) | val=6.910178 (main=6.885576, smooth=0.820081) | lr=4.529458e-05 | time=232.60s
+[Epoch 054] train=12.240333 (main=12.215366, smooth=0.832202) | val=7.573692 (main=7.549037, smooth=0.821865) | lr=4.373334e-05 | time=233.21s
+[Epoch 055] train=12.191615 (main=12.166631, smooth=0.832800) | val=7.292265 (main=7.267624, smooth=0.821371) | lr=4.217828e-05 | time=235.66s
+[Epoch 056] train=12.060157 (main=12.035177, smooth=0.832651) | val=7.122772 (main=7.098170, smooth=0.820065) | lr=4.063093e-05 | time=226.19s
+[Epoch 057] train=12.066378 (main=12.041436, smooth=0.831385) | val=7.102637 (main=7.077949, smooth=0.822903) | lr=3.909284e-05 | time=232.07s
+[Epoch 058] train=12.018973 (main=11.994032, smooth=0.831362) | val=7.354027 (main=7.329411, smooth=0.820510) | lr=3.756551e-05 | time=233.85s
+[Epoch 059] train=12.000917 (main=11.975960, smooth=0.831916) | val=6.823148 (main=6.798542, smooth=0.820208) | lr=3.605044e-05 | time=227.28s
+[Epoch 060] train=12.053409 (main=12.028474, smooth=0.831145) | val=7.298058 (main=7.273381, smooth=0.822567) | lr=3.454915e-05 | time=225.55s
+[Epoch 061] train=12.051627 (main=12.026664, smooth=0.832079) | val=6.992396 (main=6.967759, smooth=0.821247) | lr=3.306310e-05 | time=242.55s
+[Epoch 062] train=11.989717 (main=11.964777, smooth=0.831306) | val=7.350423 (main=7.325745, smooth=0.822589) | lr=3.159377e-05 | time=236.49s
+[Epoch 063] train=11.927733 (main=11.902760, smooth=0.832420) | val=7.017564 (main=6.992903, smooth=0.822047) | lr=3.014261e-05 | time=243.67s
+[Epoch 064] train=11.963655 (main=11.938718, smooth=0.831226) | val=6.874560 (main=6.849910, smooth=0.821653) | lr=2.871104e-05 | time=184.23s
+[Epoch 065] train=12.044389 (main=12.019450, smooth=0.831323) | val=7.205967 (main=7.181310, smooth=0.821897) | lr=2.730048e-05 | time=153.87s
+[Epoch 066] train=11.925890 (main=11.900954, smooth=0.831210) | val=7.152292 (main=7.127663, smooth=0.820989) | lr=2.591232e-05 | time=156.20s
+[Epoch 067] train=11.965759 (main=11.940820, smooth=0.831303) | val=7.198729 (main=7.174087, smooth=0.821396) | lr=2.454793e-05 | time=158.82s
+[Epoch 068] train=11.908644 (main=11.883704, smooth=0.831347) | val=7.249424 (main=7.224778, smooth=0.821533) | lr=2.320866e-05 | time=156.24s
+[Epoch 069] train=11.911023 (main=11.886074, smooth=0.831618) | val=7.045375 (main=7.020736, smooth=0.821282) | lr=2.189583e-05 | time=157.73s
+[Epoch 070] train=11.926910 (main=11.901961, smooth=0.831637) | val=6.946979 (main=6.922343, smooth=0.821195) | lr=2.061074e-05 | time=155.16s
+[Epoch 071] train=11.849892 (main=11.824962, smooth=0.830983) | val=7.092571 (main=7.067917, smooth=0.821811) | lr=1.935465e-05 | time=160.02s
+[Epoch 072] train=11.844895 (main=11.819966, smooth=0.830977) | val=7.136125 (main=7.111492, smooth=0.821111) | lr=1.812880e-05 | time=152.15s
+[Epoch 073] train=11.873613 (main=11.848701, smooth=0.830399) | val=6.926420 (main=6.901737, smooth=0.822747) | lr=1.693441e-05 | time=157.81s
+[Epoch 074] train=11.847551 (main=11.822642, smooth=0.830306) | val=7.170498 (main=7.145853, smooth=0.821527) | lr=1.577264e-05 | time=155.34s
+[INFO] Early stopping triggered at epoch 74.
+[INFO] Best epoch=24, best_val_loss=6.093463
+[INFO] Test metrics | MAE=77.712654, RMSE=493.384766, R2=0.514766, MAPE=51.896816, valid_ratio=0.9085
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

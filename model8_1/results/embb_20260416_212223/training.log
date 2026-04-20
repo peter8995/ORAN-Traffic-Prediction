@@ -1,0 +1,119 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-26"
+  ],
+  "test_dirs": [
+    "tr27"
+  ],
+  "slice_type": "embb",
+  "val_split": 0.2,
+  "sequence_length": 30,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 1024,
+  "epochs": 40,
+  "learning_rate": 1e-05,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 20,
+  "seed": 42,
+  "rnn_type": "lstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.1,
+  "loss_type": "mse",
+  "weight_alpha": 4.0,
+  "weight_quantile": 0.9,
+  "weight_upper_quantile": 0.99,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": false,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8_1/results/embb_20260416_212223"
+}
+[INFO] Device: cuda
+[INFO] model8_1 uses RNN-only architecture: --n_heads/--n_layers/--dim_feedforward/--vit_dropout are ignored.
+[INFO] Slice=embb | train_csv=1904 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading test CSV files...
+[INFO] Split train/val by CSV: train=1524 val=380
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.8424
+  - tx_brate: 0.8832
+  - rx_brate: 0.3669
+  - ul_sinr: 0.3018
+  - dl_mcs: 0.8829
+  - ul_mcs: 0.3018
+  - phr: 0.3442
+  - tx_pkts: 0.8832
+  - rx_pkts: 0.3880
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.2515
+  - dl_n_samples: 0.8832
+  - ul_n_samples: 0.3880
+[INFO] Windows | train=3039626 val=756227 test=140346
+[INFO] Input feature dimension: 13 (['dl_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples'])
+[INFO] lambda_smooth | base=0.100000, effective=0.020101, target_iqr=2574.000000, multiplier=0.201008, scale_aware=on
+[INFO] loss_type=mse (unweighted)
+[Epoch 001] train=0.084961 (main=0.083066, smooth=0.094242) | val=0.018889 (main=0.017569, smooth=0.065632) | lr=9.984587e-06 | time=62.86s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=0.021204 (main=0.019296, smooth=0.094911) | val=0.015931 (main=0.014612, smooth=0.065601) | lr=9.938442e-06 | time=59.67s
+[INFO] Saved new best checkpoint at epoch 2.
+[Epoch 003] train=0.018210 (main=0.016396, smooth=0.090292) | val=0.014996 (main=0.013677, smooth=0.065648) | lr=9.861850e-06 | time=54.84s
+[INFO] Saved new best checkpoint at epoch 3.
+[Epoch 004] train=0.017039 (main=0.015279, smooth=0.087530) | val=0.015899 (main=0.014580, smooth=0.065652) | lr=9.755283e-06 | time=65.75s
+[Epoch 005] train=0.016458 (main=0.014739, smooth=0.085519) | val=0.014594 (main=0.013275, smooth=0.065619) | lr=9.619398e-06 | time=68.42s
+[INFO] Saved new best checkpoint at epoch 5.
+[Epoch 006] train=0.015945 (main=0.014254, smooth=0.084110) | val=0.014187 (main=0.012870, smooth=0.065557) | lr=9.455033e-06 | time=69.71s
+[INFO] Saved new best checkpoint at epoch 6.
+[Epoch 007] train=0.015572 (main=0.013906, smooth=0.082852) | val=0.014478 (main=0.013160, smooth=0.065552) | lr=9.263201e-06 | time=61.33s
+[Epoch 008] train=0.015222 (main=0.013576, smooth=0.081883) | val=0.014552 (main=0.013235, smooth=0.065491) | lr=9.045085e-06 | time=68.96s
+[Epoch 009] train=0.014963 (main=0.013333, smooth=0.081069) | val=0.014298 (main=0.012982, smooth=0.065505) | lr=8.802030e-06 | time=62.97s
+[Epoch 010] train=0.014752 (main=0.013137, smooth=0.080357) | val=0.014152 (main=0.012834, smooth=0.065527) | lr=8.535534e-06 | time=66.74s
+[INFO] Saved new best checkpoint at epoch 10.
+[Epoch 011] train=0.014525 (main=0.012924, smooth=0.079681) | val=0.014100 (main=0.012784, smooth=0.065448) | lr=8.247240e-06 | time=64.40s
+[INFO] Saved new best checkpoint at epoch 11.
+[Epoch 012] train=0.014359 (main=0.012769, smooth=0.079085) | val=0.014082 (main=0.012767, smooth=0.065445) | lr=7.938926e-06 | time=62.89s
+[INFO] Saved new best checkpoint at epoch 12.
+[Epoch 013] train=0.014197 (main=0.012619, smooth=0.078499) | val=0.013903 (main=0.012587, smooth=0.065429) | lr=7.612493e-06 | time=62.90s
+[INFO] Saved new best checkpoint at epoch 13.
+[Epoch 014] train=0.014065 (main=0.012496, smooth=0.078065) | val=0.014296 (main=0.012982, smooth=0.065414) | lr=7.269952e-06 | time=70.67s
+[Epoch 015] train=0.013940 (main=0.012378, smooth=0.077720) | val=0.014152 (main=0.012838, smooth=0.065354) | lr=6.913417e-06 | time=76.75s
+[Epoch 016] train=0.013820 (main=0.012267, smooth=0.077301) | val=0.014025 (main=0.012711, smooth=0.065353) | lr=6.545085e-06 | time=72.48s
+[Epoch 017] train=0.013715 (main=0.012169, smooth=0.076928) | val=0.014220 (main=0.012906, smooth=0.065356) | lr=6.167227e-06 | time=71.80s
+[Epoch 018] train=0.013643 (main=0.012102, smooth=0.076673) | val=0.014784 (main=0.013472, smooth=0.065263) | lr=5.782172e-06 | time=72.23s
+[Epoch 019] train=0.013574 (main=0.012038, smooth=0.076407) | val=0.014507 (main=0.013195, smooth=0.065257) | lr=5.392295e-06 | time=72.02s
+[Epoch 020] train=0.013514 (main=0.011982, smooth=0.076232) | val=0.014529 (main=0.013218, smooth=0.065218) | lr=5.000000e-06 | time=70.86s
+[Epoch 021] train=0.013440 (main=0.011913, smooth=0.075977) | val=0.014354 (main=0.013043, smooth=0.065216) | lr=4.607705e-06 | time=68.84s
+[Epoch 022] train=0.013400 (main=0.011876, smooth=0.075820) | val=0.013956 (main=0.012645, smooth=0.065220) | lr=4.217828e-06 | time=58.91s
+[Epoch 023] train=0.013359 (main=0.011838, smooth=0.075665) | val=0.014118 (main=0.012808, smooth=0.065200) | lr=3.832773e-06 | time=51.13s
+[Epoch 024] train=0.013301 (main=0.011784, smooth=0.075459) | val=0.014540 (main=0.013230, smooth=0.065138) | lr=3.454915e-06 | time=52.93s
+[Epoch 025] train=0.013256 (main=0.011742, smooth=0.075317) | val=0.014347 (main=0.013038, smooth=0.065117) | lr=3.086583e-06 | time=54.90s
+[Epoch 026] train=0.013234 (main=0.011721, smooth=0.075269) | val=0.013897 (main=0.012587, smooth=0.065162) | lr=2.730048e-06 | time=54.94s
+[INFO] Saved new best checkpoint at epoch 26.
+[Epoch 027] train=0.013193 (main=0.011684, smooth=0.075088) | val=0.014329 (main=0.013019, smooth=0.065145) | lr=2.387507e-06 | time=56.55s
+[Epoch 028] train=0.013169 (main=0.011660, smooth=0.075057) | val=0.014391 (main=0.013082, smooth=0.065142) | lr=2.061074e-06 | time=57.05s
+[Epoch 029] train=0.013164 (main=0.011656, smooth=0.074990) | val=0.014229 (main=0.012920, smooth=0.065124) | lr=1.752760e-06 | time=54.94s
+[Epoch 030] train=0.013127 (main=0.011621, smooth=0.074924) | val=0.014407 (main=0.013098, smooth=0.065146) | lr=1.464466e-06 | time=58.81s
+[Epoch 031] train=0.013116 (main=0.011610, smooth=0.074884) | val=0.014151 (main=0.012842, smooth=0.065150) | lr=1.197970e-06 | time=55.70s
+[Epoch 032] train=0.013107 (main=0.011602, smooth=0.074887) | val=0.014281 (main=0.012972, smooth=0.065120) | lr=9.549150e-07 | time=57.53s
+[Epoch 033] train=0.013085 (main=0.011582, smooth=0.074790) | val=0.014271 (main=0.012962, smooth=0.065136) | lr=7.367992e-07 | time=57.43s
+[Epoch 034] train=0.013069 (main=0.011566, smooth=0.074743) | val=0.014113 (main=0.012803, smooth=0.065128) | lr=5.449674e-07 | time=44.84s
+[Epoch 035] train=0.013062 (main=0.011560, smooth=0.074721) | val=0.014272 (main=0.012963, smooth=0.065123) | lr=3.806023e-07 | time=35.53s
+[Epoch 036] train=0.013060 (main=0.011559, smooth=0.074694) | val=0.014187 (main=0.012878, smooth=0.065117) | lr=2.447174e-07 | time=35.69s
+[Epoch 037] train=0.013050 (main=0.011549, smooth=0.074710) | val=0.014326 (main=0.013017, smooth=0.065119) | lr=1.381504e-07 | time=34.82s
+[Epoch 038] train=0.013052 (main=0.011551, smooth=0.074708) | val=0.014308 (main=0.012999, smooth=0.065117) | lr=6.155830e-08 | time=35.10s
+[Epoch 039] train=0.013043 (main=0.011542, smooth=0.074701) | val=0.014279 (main=0.012970, smooth=0.065119) | lr=1.541333e-08 | time=37.07s
+[Epoch 040] train=0.013046 (main=0.011545, smooth=0.074694) | val=0.014274 (main=0.012965, smooth=0.065119) | lr=0.000000e+00 | time=36.85s
+[INFO] Best epoch=26, best_val_loss=0.013897
+[INFO] Test metrics | MAE=72.570976, RMSE=97.735390, R2=0.946865, MAPE=19.936184, valid_ratio=0.9003
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

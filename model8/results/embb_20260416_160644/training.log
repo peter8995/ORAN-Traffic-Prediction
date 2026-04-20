@@ -85,3 +85,18 @@
 [Epoch 014] train=0.012632 (main=0.011121, smooth=0.075150) | val=0.013816 (main=0.012524, smooth=0.064278) | lr=7.269952e-06 | time=120.44s
 [Epoch 015] train=0.012531 (main=0.011031, smooth=0.074642) | val=0.014090 (main=0.012799, smooth=0.064214) | lr=6.913417e-06 | time=117.54s
 [Epoch 016] train=0.012433 (main=0.010941, smooth=0.074245) | val=0.014169 (main=0.012878, smooth=0.064209) | lr=6.545085e-06 | time=117.29s
+[Epoch 017] train=0.012357 (main=0.010873, smooth=0.073831) | val=0.014334 (main=0.013043, smooth=0.064241) | lr=6.167227e-06 | time=117.79s
+[Epoch 018] train=0.012285 (main=0.010808, smooth=0.073513) | val=0.014876 (main=0.013586, smooth=0.064149) | lr=5.782172e-06 | time=106.30s
+[Epoch 019] train=0.012228 (main=0.010757, smooth=0.073176) | val=0.014947 (main=0.013658, smooth=0.064125) | lr=5.392295e-06 | time=118.34s
+[Epoch 020] train=0.012168 (main=0.010704, smooth=0.072815) | val=0.015363 (main=0.014075, smooth=0.064077) | lr=5.000000e-06 | time=121.04s
+[Epoch 021] train=0.012116 (main=0.010657, smooth=0.072582) | val=0.014692 (main=0.013402, smooth=0.064146) | lr=4.607705e-06 | time=114.17s
+[Epoch 022] train=0.012090 (main=0.010635, smooth=0.072353) | val=0.014694 (main=0.013405, smooth=0.064113) | lr=4.217828e-06 | time=112.82s
+[Epoch 023] train=0.012044 (main=0.010594, smooth=0.072133) | val=0.014967 (main=0.013678, smooth=0.064118) | lr=3.832773e-06 | time=123.79s
+[Epoch 024] train=0.012003 (main=0.010557, smooth=0.071939) | val=0.015720 (main=0.014433, smooth=0.064042) | lr=3.454915e-06 | time=111.59s
+[Epoch 025] train=0.011964 (main=0.010522, smooth=0.071721) | val=0.015792 (main=0.014505, smooth=0.064010) | lr=3.086583e-06 | time=111.86s
+[Epoch 026] train=0.011938 (main=0.010500, smooth=0.071542) | val=0.015573 (main=0.014286, smooth=0.064028) | lr=2.730048e-06 | time=114.51s
+[INFO] Early stopping triggered at epoch 26.
+[INFO] Best epoch=6, best_val_loss=0.012769
+[INFO] Test metrics | MAE=44.393936, RMSE=69.869873, R2=0.972844, MAPE=10.593026, valid_ratio=0.9003
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.
