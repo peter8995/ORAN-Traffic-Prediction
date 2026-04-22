@@ -15,7 +15,10 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
 - **`model7/`**: Custom Tiny ViT variant — replaces the 86M-parameter torchvision vit_b_16 with a lightweight ~0.8-2.4M parameter transformer encoder, better matching model capacity to the 15×11 time-series input scale.
 - **`model7_1/`**: Regression-only ablation of model7 — removes the spike detection head to verify whether multi-task learning actually helps regression. All slices use BiLSTM.
+- **`model8/`**: Regression-first redesign — RobustScaler, chunk-shuffle sampler, smooth-consistency loss, per-CSV val split, optional leave-trial-out val via `--val_dirs`, optional weighted MSE for tail samples. Target switched to `sum_granted_prbs`; features reduced to 13 dims.
+- **`model8_1/`**: Transformer ablation of model8 — drops the 3-layer TransformerEncoder, keeps input projection + pos_embedding + LSTM + head. DataProcessor / train.py identical to model8.
 - **`model_detect_peak/`**: Spike predictability baselines using Autoencoder and Isolation Forest (unsupervised anomaly detection).
+- **`docs/`**: Per-model deep-dive notes (`model5_6_7_history.md`, `model7_1_ablation.md`, `model8.md`, `model8_1.md`, `model_detect_peak.md`).
 
 ## 📊 Datasets
 
@@ -99,6 +102,30 @@ Identical architecture to Model 7 (TinyViT + BiLSTM) but with the spike detectio
 
 - **Ablation Conclusion**: Model 7_1 achieves equal or slightly better regression than Model 7 across all slices, indicating the spike head divides rather than focuses the backbone's learning capacity. The mMTC/uRLLC bottleneck (R² ≈ 0.4, negative spike R²) persists regardless of the spike head — it reflects a fundamental model/feature expressiveness limit, not overfitting.
 
+### Model 8: Regression-First Redesign (`model8/`)
+A clean rewrite targeting the mMTC/uRLLC regression bottleneck (R² ≈ 0.4) identified in Model 7_1. Drops the spike head permanently and re-engineers the data pipeline, loss, and scaler. Per-slice independent training (no cross-slice fusion, since the three slices are not time-aligned).
+
+- **Architecture**: `Linear(13→d_model) → pos_embedding → TransformerEncoder(3 layers) → LSTM/BiLSTM → last-step FF head → (batch, horizon)`. No CLS token (downstream is sequence model, not classifier). Multi-horizon ready, first release uses `horizon=1`.
+- **Features (13 dims)**: Drops `ul_rssi` / `ul_buffer` (near-constant zero on train set), adds `dl_cqi`, `rx_errors_ul`, `dl_n_samples`, `ul_n_samples`.
+- **Target**: `sum_granted_prbs` (replaces `sum_requested_prbs` used in models 1-7).
+- **Scaler**: **RobustScaler** (median + IQR), per-slice global, fit on train split only — tolerant to PRB outliers that MinMaxScaler compresses.
+- **Sliding Window**: CSV is the minimum time-series unit; windows, chunks, and train/val splits never cross CSV boundaries.
+- **ChunkShuffleSampler**: Each CSV is cut into contiguous `chunk_size` blocks; blocks shuffle between epochs but timesteps inside a block stay ordered — enables temporal diff-based smooth loss while still randomizing gradients.
+- **Loss**: `L = L_main + λ_smooth × L_smooth`
+  - `L_main`: MSE or optional **Weighted MSE** (linear ramp above `--weight_quantile`, saturates at `--weight_upper_quantile` with factor `1 + α`) — targets the mean-regression bias observed on mMTC/uRLLC tails.
+  - `L_smooth`: `mean(|Δŷ - Δy|)` on adjacent samples, masks chunk-boundary pairs.
+  - **Scale-aware λ**: `effective = base × sqrt(ref_iqr / target_iqr)` auto-balances smoothness magnitude across slices with very different target scales; disable with `--disable_scale_aware_lambda`.
+- **Train/Val split (2026-04-21+)**: Supports explicit leave-trial-out via `--val_dirs tr25 tr26` (aligns with test distribution) or the original per-CSV random split via `--val_split 0.2`. `DataProcessor.prepare()` forbids any overlap between `train_dirs`, `val_dirs`, `test_dirs` (raises `ValueError` before CSVs are loaded).
+- **Training**: AdamW + optional CosineAnnealingLR, early stopping on `val_total_loss` (`--patience 0` disables), seed-stable, single best checkpoint saved per run.
+- **Outputs**: `results/{slice_type}_{YYYYMMDD_HHMMSS}/` contains `config.json`, `model_best.pth`, `metrics.csv`, `metrics.tex`, `history.csv`, `training.log`, and 7 plots (per-experiment prediction, combined prediction + residual, residual histogram, box plot, residual over time, training history, scatter with R² diagonal).
+- See `docs/model8.md` and `model8/DESIGN.md` for the full decision log and round-by-round experiment results.
+
+### Model 8_1: Transformer Ablation (`model8_1/`)
+Drops the 3-layer TransformerEncoder from Model 8 to measure whether the Transformer actually helps regression on each slice. `DataProcessor.py` and `train.py` are identical to Model 8 (including the `--val_dirs` leave-trial-out support); only `model.py` differs.
+
+- **Architecture**: `Linear(13→d_model) → pos_embedding → LSTM/BiLSTM → last-step FF head` — preserves input projection and learnable positional embedding so the only ablated variable is the Transformer stack.
+- **Intent**: Clean single-variable ablation against Model 8's round-2 baseline. See `docs/model8_1.md`.
+
 ### Spike Predictability Baselines (`model_detect_peak/`)
 Independent unsupervised/anomaly detection baselines to evaluate the inherent predictability of traffic spikes, without the full ViT+LSTM pipeline.
 - **Models**: Autoencoder (PyTorch) and Isolation Forest (scikit-learn).
@@ -117,8 +144,8 @@ The original paper's adaptive threshold (`τ = Q_0.9 × (1 + ψ × ξ_m/ξ_max)`
 ### Prerequisites
 - Python 3.x
 - PyTorch
-- torchvision
-- scikit-learn (MinMaxScaler, IsolationForest)
+- torchvision (models 1-7 only; model8 / model8_1 have no torchvision dependency)
+- scikit-learn (MinMaxScaler, RobustScaler, IsolationForest)
 - pandas, numpy, matplotlib
 
 ### Data Preparation
@@ -191,7 +218,49 @@ python train.py --train_dirs tr0-26 --test_dirs tr27 \
   --weight_decay 0.0 \
   --vit_dropout 0.2
 ```
-Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`.
+
+Model 8 (regression-first redesign — RobustScaler, chunk sampler, smooth loss, per-CSV val split or explicit leave-trial-out val):
+```bash
+cd model8
+# Recommended: explicit leave-trial-out val — aligns val distribution with test
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
+  --epochs 500 --patience 50 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.1
+
+# Fallback: auto-random 20% per-CSV split (legacy behavior)
+python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+  --val_split 0.2 \
+  --epochs 500 --patience 50 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.1
+
+# Optional: weighted MSE for tail samples (α=4 weights the top decile up to 5x)
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type urllc \
+  --loss_type weighted_mse --weight_alpha 4 \
+  --weight_quantile 0.9 --weight_upper_quantile 0.99 \
+  --epochs 500 --patience 50 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.05
+```
+- `--val_dirs` takes precedence over `--val_split` when both are given; `--val_split` is ignored.
+- `train_dirs`, `val_dirs`, `test_dirs` must be pairwise disjoint — any overlap raises `ValueError` before CSVs are loaded.
+- Use `--patience 0` to disable early stopping and always run `--epochs` full iterations.
+- Use `--disable_scale_aware_lambda` to turn off the per-slice `sqrt(ref_iqr / target_iqr)` smoothness scaling.
+
+Model 8_1 (Transformer ablation — same CLI as Model 8, only `model.py` differs):
+```bash
+cd model8_1
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
+  --epochs 500 --patience 0 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.05
+```
+
+Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`; multiple tokens allowed, e.g. `tr0-4 tr10`.
 
 For spike detection baselines:
 ```bash
@@ -208,6 +277,7 @@ python isolation_forest_detect.py --train_dirs tr0-4 tr10 --test_dirs tr5-6 \
 
 ### Results
 During and after training, the scripts will generate evaluation metrics and save visualization plots in a `results/` folder within the respective model's directory:
-- **Loss curve**: `{slice_type}_multi_dir_loss_curve.png`
-- **Prediction comparison**: `{slice_type}_multi_dir_prediction.png`
+- **Loss curve** (models 1-7_1): `{slice_type}_multi_dir_loss_curve.png`
+- **Prediction comparison** (models 1-7_1): `{slice_type}_multi_dir_prediction.png`
 - **Spike detection** (model5/6): `{slice_type}_spike_detection.png` — dual-subplot with demand prediction (top) and ground truth vs predicted spike overlay (bottom)
+- **model8 / model8_1**: `results/{slice_type}_{YYYYMMDD_HHMMSS}/` containing `config.json`, `model_best.pth`, `metrics.csv`, `metrics.tex`, `history.csv`, `training.log`, and a `plots/` folder with 7 figures (`prediction.png`, `prediction_combined.png`, `error_hist.png`, `error_box.png`, `residuals.png`, `history.png`, `scatter.png`).

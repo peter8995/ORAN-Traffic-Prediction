@@ -10,7 +10,7 @@
 - Chunk shuffle sampler（csv 內切 chunk，chunk 內順序保留，跨 csv 不混）
 - Multi-horizon 架構已就緒，第一版 horizon=1
 - Loss = MSE + λ × smooth diff consistency；smooth loss 在 chunk/experiment 邊界要 mask
-- Val split 以 csv（experiment）為單位，非 random timestep
+- Val split 以 csv（experiment）為單位，非 random timestep；**2026-04-21 起**支援 `--val_dirs` 顯式 leave-trial-out（對齊 test 分佈），舊的 `--val_split` 隨機 CSV 切分仍保留為 fallback
 
 ## 檔案
 - `model8/DataProcessor.py` — RobustScaler + ChunkShuffleSampler + per-CSV sliding window
@@ -22,11 +22,22 @@
 ## Training Command
 ```bash
 cd model8
+# 推薦：顯式 leave-trial-out val（對齊 test 分佈）
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
+  --epochs 500 --patience 50 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.1
+
+# 舊行為（自動 CSV 隨機切 20%，保留為 fallback）
 python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+  --val_split 0.2 \
   --epochs 500 --patience 50 --batch_size 1024 \
   --learning_rate 1e-4 --scheduler cosine \
   --rnn_type bilstm --lambda_smooth 0.1
 ```
+
+> `--train_dirs` / `--val_dirs` / `--test_dirs` 三組交集會在 `DataProcessor.prepare()` 直接 `ValueError`，必須分離。
 
 ## 特徵（13 維，2026-04-14 調整）
 原 15 維扣掉兩個常數特徵：
@@ -146,6 +157,23 @@ python train.py ... --slice_type embb --epochs 30 --patience 10 \
 - embb 已穩定，維持 mse
 - mmtc/urllc 本輪配置不佳；weighted loss 概念有效（改善 tail），但需降 α + 加 scheduler + early stop
 - 特徵資訊不足是中長期瓶頸
+
+## 第四輪改動（2026-04-21，待跑）
+
+### 新增 `--val_dirs` 顯式 leave-trial-out
+
+**動機：** 原本 `--val_split 0.2` 按 CSV 隨機切，可能把同 `(tr, exp)` 不同 `bs` 的 CSV 分到 train/val 兩側，造成 val_loss 嚴重低估真實泛化誤差；而 test 是 leave-trial-out (`tr27`)，val 與 test 分佈不一致，early stopping 選不到對 test 最好的 checkpoint。
+
+**改動：**
+1. `train.py` 新增 `--val_dirs`（`nargs="+"`，預設 `None`），支援 `tr25 tr26` 或範圍記號 `tr25-26`
+2. 指定 `--val_dirs` 時 `--val_split` 被忽略；未指定則走舊隨機 CSV 切分
+3. `DataProcessor.prepare()` 強制檢查 `train∩test` / `train∩val` / `test∩val` 三組交集，有交集直接 `ValueError`（在讀 CSV 之前）
+4. 使用者需自行把 `--train_dirs` 改成 `tr0-24`（把 val 用到的 tr 剔除），不自動剔除以避免訓練條件回溯混亂
+
+**建議設定：**
+```bash
+--train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27
+```
 
 ## 尚未解決
 - Weighted MSE 方向正確（改善 tail bias）但 α=4 過重，需調降 + 搭配 scheduler/early stop

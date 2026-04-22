@@ -153,9 +153,21 @@ sum_requested_prbs, sum_granted_prbs, <empty>, dl_pmi, dl_ri, ul_n, ul_turbo_ite
 
 ### 5.5 Train / Val / Test 切分
 
-- `--train_dirs` / `--test_dirs` 由 CLI 指定（沿用 `tr0-26` 範圍記號）
+兩種 val 策略擇一：
+
+**(A) 顯式 leave-trial-out（推薦，對齊 test 分佈）**
+- `--val_dirs` 指定完整的 val trial（沿用 `tr0-26` 範圍記號），例如 `--val_dirs tr25 tr26`
+- val 與 train 同為 leave-trial-out，`val_total_loss` 可直接作為 test 效能代理（early stopping 不會被「同 trial 不同 bs」的高相關性樣本誤導）
+- 指定 `--val_dirs` 時 `--val_split` 會被忽略
+
+**(B) 自動隨機 CSV 切分（舊行為）**
+- 未指定 `--val_dirs` 時啟用
 - val 從 train 切：`--val_split 0.2`，**按 csv 為單位** shuffle 後切，不在 csv 內部切
-- test set 不參與 val，獨立保留
+- ⚠️ 同 `(tr, exp)` 的 7 個 bs 可能被分到兩側，泛化風險高
+
+**三組 dirs 強制不交集**
+- `DataProcessor.prepare()` 檢查 train∩test、train∩val、test∩val，任一有交集直接 `ValueError`
+- 失敗點在讀 CSV 之前，使用者不會白等 I/O
 
 ### 5.6 Chunk Shuffle Sampler
 
@@ -216,10 +228,10 @@ L_total = L_main + λ_smooth × L_smooth
 
 ```bash
 python train.py \
-  --train_dirs tr0-26 \
+  --train_dirs tr0-24 \
+  --val_dirs tr25 tr26 \
   --test_dirs tr27 \
   --slice_type embb \
-  --val_split 0.2 \
   --sequence_length 15 \
   --horizon 1 \
   --batch_size 1024 \
@@ -242,11 +254,13 @@ python train.py \
   --seed 42
 ```
 
+> 舊行為（自動 CSV 切分）：把 `--val_dirs tr25 tr26` 換成 `--val_split 0.2`。
+
 ### 參數分組
 
 | 群組 | 參數 |
 |---|---|
-| 資料 | `--train_dirs`, `--test_dirs`, `--slice_type`, `--val_split` |
+| 資料 | `--train_dirs`, `--val_dirs`, `--test_dirs`, `--slice_type`, `--val_split` |
 | 序列 | `--sequence_length`, `--horizon`, `--chunk_size` |
 | 訓練 | `--batch_size`, `--epochs`, `--learning_rate`, `--weight_decay`, `--scheduler`, `--patience`, `--seed` |
 | 模型-RNN | `--rnn_type {lstm,bilstm}`, `--lstm_hidden`, `--lstm_layers`, `--lstm_dropout` |
@@ -322,6 +336,8 @@ model8/results/{slice_type}_{YYYYMMDD_HHMMSS}/
 | 10 | Target = sum_granted_prbs | sum_requested_prbs | 反映實際分配，與調度行為對齊 |
 | 11 | RobustScaler（per-slice global） | MinMax / Standard | PRB 有突峰 outlier，MinMax 會壓縮正常值解析度 |
 | 12 | Train/val 按 csv（experiment）切，不按 timestep | 隨機 timestep 切 | 防止時序洩漏 |
+| 12a | 新增 `--val_dirs` 顯式 leave-trial-out，取代預設的隨機 CSV 切分 | 只保留隨機 CSV / 分層抽 exp | val 要和 test（leave-trial-out）同分佈，才能讓 early stopping 的選擇對 test 有意義；舊的隨機 CSV 切會把同 (tr, exp) 不同 bs 分兩側，造成 val_loss 過度樂觀 |
+| 12b | train / val / test dirs 交集直接 raise | 自動剔除交集 / 印 warning | 自動剔除會讓 CLI 寫的 train 數量與實際不符，日後追訓練條件混亂；raise 逼使用者明寫 `tr0-24` |
 | 13 | csv 是時序最小單位（sliding window/chunk/切分都不跨） | 跨 csv 拼接 | 不同 csv 屬不同實驗，跨界違反物理 |
 | 14 | Loss = MSE + 0.1 × smooth | SmoothL1 / 不同 λ | 選擇符合使用者偏好 |
 | 15 | AdamW + cosine 為 CLI option，預設 weight_decay=0、scheduler=none | 寫死配方 | 與 early stopping 不完全相容，先 baseline 再決定 |

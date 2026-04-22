@@ -21,6 +21,7 @@ SLICE_DIR_MAP: Dict[str, str] = {
 
 FEATURE_ORDER: List[str] = [
     "dl_buffer",
+    "ul_buffer",
     "tx_brate",
     "rx_brate",
     "ul_sinr",
@@ -33,6 +34,7 @@ FEATURE_ORDER: List[str] = [
     "rx_errors_ul",
     "dl_n_samples",
     "ul_n_samples",
+    "sum_requested_prbs",
 ]
 
 FEATURE_CANDIDATES: Dict[str, List[str]] = {
@@ -51,6 +53,7 @@ FEATURE_CANDIDATES: Dict[str, List[str]] = {
     "rx_errors_ul": ["rxerrorsuplink", "rxerrorsuplinkpercent"],
     "dl_n_samples": ["dlnsamples"],
     "ul_n_samples": ["ulnsamples"],
+    "sum_requested_prbs": ["sumrequestedprbs", "sumrequestprbs"],
 }
 
 TARGET_CANDIDATES: List[str] = ["sumgrantedprbs"]
@@ -360,26 +363,62 @@ class DataProcessor:
         self,
         train_dirs: Sequence[str],
         test_dirs: Sequence[str],
+        val_dirs: Sequence[str] | None,
         val_split: float,
     ) -> PreparedData:
         expanded_train_dirs = self.expand_trial_dirs(train_dirs)
         expanded_test_dirs = self.expand_trial_dirs(test_dirs)
+        expanded_val_dirs = self.expand_trial_dirs(val_dirs) if val_dirs else None
+
+        overlap_train_test = sorted(set(expanded_train_dirs) & set(expanded_test_dirs))
+        if overlap_train_test:
+            raise ValueError(
+                f"test_dirs overlaps with train_dirs: {overlap_train_test}. "
+                "Use disjoint trial dirs for train and test."
+            )
+
+        if expanded_val_dirs is not None:
+            overlap_train_val = sorted(set(expanded_train_dirs) & set(expanded_val_dirs))
+            if overlap_train_val:
+                raise ValueError(
+                    f"val_dirs overlaps with train_dirs: {overlap_train_val}. "
+                    "Remove them from --train_dirs (e.g. tr0-24 if val is tr25 tr26)."
+                )
+            overlap_test_val = sorted(set(expanded_test_dirs) & set(expanded_val_dirs))
+            if overlap_test_val:
+                raise ValueError(f"val_dirs overlaps with test_dirs: {overlap_test_val}.")
+            print(f"[INFO] Val trials (explicit): {expanded_val_dirs}")
 
         train_csv_paths = self.collect_csv_paths(expanded_train_dirs)
         test_csv_paths = self.collect_csv_paths(expanded_test_dirs)
+        val_csv_paths: List[Path] = []
+        if expanded_val_dirs is not None:
+            val_csv_paths = self.collect_csv_paths(expanded_val_dirs)
 
         print(
             f"[INFO] Slice={self.slice_type} | "
-            f"train_csv={len(train_csv_paths)} | test_csv={len(test_csv_paths)}"
+            f"train_csv={len(train_csv_paths)} | "
+            f"val_csv={len(val_csv_paths) if expanded_val_dirs is not None else 'auto'} | "
+            f"test_csv={len(test_csv_paths)}"
         )
 
         print("[INFO] Loading train CSV files...")
         train_records_all = [self._load_single_csv(path) for path in train_csv_paths]
+        if expanded_val_dirs is not None:
+            print("[INFO] Loading val CSV files...")
+            val_records = [self._load_single_csv(path) for path in val_csv_paths]
         print("[INFO] Loading test CSV files...")
         test_records = [self._load_single_csv(path) for path in test_csv_paths]
 
-        train_records, val_records = self._split_train_val(train_records_all, val_split, self.seed)
-        print(f"[INFO] Split train/val by CSV: train={len(train_records)} val={len(val_records)}")
+        if expanded_val_dirs is not None:
+            train_records = train_records_all
+            print(
+                f"[INFO] Use explicit val dirs: train={len(train_records)} val={len(val_records)} "
+                "(--val_split ignored)"
+            )
+        else:
+            train_records, val_records = self._split_train_val(train_records_all, val_split, self.seed)
+            print(f"[INFO] Split train/val by CSV: train={len(train_records)} val={len(val_records)}")
 
         self._log_non_zero_ratios(train_records)
 

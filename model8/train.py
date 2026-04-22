@@ -56,9 +56,20 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--data_root", type=str, default=str(default_data_root))
     parser.add_argument("--train_dirs", nargs="+", required=True)
+    parser.add_argument(
+        "--val_dirs",
+        nargs="+",
+        default=None,
+        help="Validation trial dirs (e.g., tr25 tr26 or tr25-26). If set, --val_split is ignored.",
+    )
     parser.add_argument("--test_dirs", nargs="+", required=True)
     parser.add_argument("--slice_type", type=str, choices=["embb", "mmtc", "urllc"], required=True)
-    parser.add_argument("--val_split", type=float, default=0.2)
+    parser.add_argument(
+        "--val_split",
+        type=float,
+        default=0.2,
+        help="Validation split ratio used only when --val_dirs is not provided.",
+    )
 
     parser.add_argument("--sequence_length", type=int, default=15)
     parser.add_argument("--horizon", type=int, default=1)
@@ -137,6 +148,8 @@ def parse_args() -> argparse.Namespace:
         parser.error("--weight_upper_quantile must be in [0, 1].")
     if args.weight_quantile >= args.weight_upper_quantile:
         parser.error("--weight_quantile must be < --weight_upper_quantile.")
+    if args.val_dirs is None and not (0.0 < args.val_split < 1.0):
+        parser.error("--val_split must be in (0, 1) when --val_dirs is not provided.")
 
     return args
 
@@ -601,6 +614,7 @@ def main_train(args: argparse.Namespace, output_dir: Path) -> None:
     prepared = data_processor.prepare(
         train_dirs=args.train_dirs,
         test_dirs=args.test_dirs,
+        val_dirs=args.val_dirs,
         val_split=args.val_split,
     )
 

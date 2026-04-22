@@ -35,6 +35,8 @@ python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type urllc \
   --rnn_type bilstm --lambda_smooth 0.05
 ```
 
+> **注意（2026-04-21+）：** `DataProcessor.py` 已同步 model8 的改動，支援 `--val_dirs` 顯式 leave-trial-out（三組 dirs 交集會 raise）。若要和 model8 最新設定對齊，把上面的 `--train_dirs tr0-26` 改成 `--train_dirs tr0-24 --val_dirs tr25 tr26`。
+
 ## 對照基準（model8 round 2 結果）
 
 | Slice | best_epoch | Test MAE | Test R² |

@@ -70,22 +70,31 @@ Directory range: `tr0-4` → `tr0..tr4`.
 ### model8
 ```bash
 cd model8
-python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+# 推薦：顯式 leave-trial-out val（2026-04-21+）
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
   --epochs 500 --patience 50 --batch_size 1024 \
   --learning_rate 1e-4 --scheduler cosine \
   --rnn_type bilstm --lambda_smooth 0.1
+
+# 舊行為：自動隨機切 CSV 20% 當 val（fallback）
+python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+  --val_split 0.2 ...
 ```
-細節見 `docs/model8.md`。
+- `--val_dirs` 指定時 `--val_split` 被忽略
+- `train_dirs` / `val_dirs` / `test_dirs` 三組交集會 `ValueError`（必須分離）
+- 細節見 `docs/model8.md`
 
 ### model8_1
 ```bash
 cd model8_1
-python train.py --train_dirs tr0-26 --test_dirs tr27 --slice_type mmtc \
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
   --epochs 500 --patience 0 --batch_size 1024 \
   --learning_rate 1e-4 --scheduler cosine \
   --rnn_type bilstm --lambda_smooth 0.05
 ```
-和 model8 完全相同設定，唯一差異是 model.py 移除了 TransformerEncoder。細節見 `docs/model8_1.md`。
+和 model8 完全相同設定，唯一差異是 model.py 移除了 TransformerEncoder（DataProcessor 同步支援 `--val_dirs`）。細節見 `docs/model8_1.md`。
 
 ## Datasets
 
