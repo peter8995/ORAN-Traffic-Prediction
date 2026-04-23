@@ -1,0 +1,21 @@
+primary_k=3.000000
+error_mode=both
+k_values=[2.0, 3.0]
+flag_tensor_shape=(2, 2, 141463)  # (num_k, mode, num_test)
+mode_index={0: signed, 1: abs}
+
+[original_space]
+signed:
+  k=2.000 mean=-743.286101 std=1351.467706 lower=-3446.221514 upper=1959.649311 flag_rate=0.149346
+  k=3.000 mean=-743.286101 std=1351.467706 lower=-4797.689220 upper=3311.117017 flag_rate=0.125171
+abs:
+  k=2.000 mean=848.345554 std=1288.118399 threshold=3424.582353 flag_rate=0.147841
+  k=3.000 mean=848.345554 std=1288.118399 threshold=4712.700752 flag_rate=0.125510
+
+[scaled_space]
+signed:
+  k=2.000 mean=-1.346533 std=2.448311 lower=-6.243155 upper=3.550089 flag_rate=0.149346
+  k=3.000 mean=-1.346533 std=2.448311 lower=-8.691466 upper=5.998400 flag_rate=0.125171
+abs:
+  k=2.000 mean=1.536858 std=2.333548 threshold=6.203954 flag_rate=0.147841
+  k=3.000 mean=1.536858 std=2.333548 threshold=8.537501 flag_rate=0.125510

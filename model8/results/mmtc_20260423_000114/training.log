@@ -1,0 +1,106 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0-9",
+    "tr11-14",
+    "tr16-27"
+  ],
+  "val_dirs": [
+    "tr10"
+  ],
+  "test_dirs": [
+    "tr15"
+  ],
+  "slice_type": "mmtc",
+  "val_split": 0.2,
+  "sequence_length": 30,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 512,
+  "epochs": 100,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "cosine",
+  "patience": 20,
+  "seed": 42,
+  "rnn_type": "bilstm",
+  "lstm_hidden": 128,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "d_model": 128,
+  "n_heads": 4,
+  "n_layers": 3,
+  "dim_feedforward": 512,
+  "vit_dropout": 0.2,
+  "lambda_smooth": 0.0,
+  "loss_type": "mse",
+  "weight_alpha": 4.0,
+  "weight_quantile": 0.9,
+  "weight_upper_quantile": 0.99,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": false,
+  "num_workers": 0,
+  "device": "auto",
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model8/results/mmtc_20260423_000114"
+}
+[INFO] Device: cuda
+[INFO] Val trials (explicit): ['tr10']
+[INFO] Slice=mmtc | train_csv=1820 | val_csv=96 | test_csv=69
+[INFO] Loading train CSV files...
+[INFO] Loading val CSV files...
+[INFO] Loading test CSV files...
+[INFO] Use explicit val dirs: train=1820 val=96 (--val_split ignored)
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.0624
+  - ul_buffer: 0.0036
+  - tx_brate: 0.8831
+  - rx_brate: 0.2668
+  - ul_sinr: 0.2497
+  - dl_mcs: 0.8810
+  - ul_mcs: 0.2497
+  - phr: 0.2497
+  - tx_pkts: 0.8831
+  - rx_pkts: 0.2933
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.1725
+  - dl_n_samples: 0.8831
+  - ul_n_samples: 0.2933
+  - sum_requested_prbs: 0.8831
+[INFO] Windows | train=3622141 val=182848 test=140076
+[INFO] Input feature dimension: 15 (['dl_buffer', 'ul_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples', 'sum_requested_prbs'])
+[INFO] lambda_smooth | base=0.000000, effective=0.000000, target_iqr=54.000000, multiplier=1.387777, scale_aware=on
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[INFO] loss_type=mse (unweighted)
+[Epoch 001] train=12.828275 (main=12.828275, smooth=0.832575) | val=2.736200 (main=2.736200, smooth=0.837843) | lr=9.997533e-05 | time=195.37s
+[INFO] Saved new best checkpoint at epoch 1.
+[Epoch 002] train=9.365050 (main=9.365050, smooth=0.829324) | val=1.010467 (main=1.010467, smooth=0.838694) | lr=9.990134e-05 | time=198.30s
+[INFO] Saved new best checkpoint at epoch 2.
+[Epoch 003] train=8.409235 (main=8.409235, smooth=0.826624) | val=1.000616 (main=1.000616, smooth=0.840098) | lr=9.977810e-05 | time=206.24s
+[INFO] Saved new best checkpoint at epoch 3.
+[Epoch 004] train=8.795642 (main=8.795642, smooth=0.828201) | val=1.348444 (main=1.348444, smooth=0.832557) | lr=9.960574e-05 | time=186.10s
+[Epoch 005] train=8.182264 (main=8.182264, smooth=0.832401) | val=1.329082 (main=1.329082, smooth=0.837017) | lr=9.938442e-05 | time=193.08s
+[Epoch 006] train=8.427421 (main=8.427421, smooth=0.827783) | val=1.019726 (main=1.019726, smooth=0.834010) | lr=9.911436e-05 | time=185.80s
+[Epoch 007] train=8.403123 (main=8.403123, smooth=0.827052) | val=1.780671 (main=1.780671, smooth=0.833197) | lr=9.879584e-05 | time=193.36s
+[Epoch 008] train=8.210550 (main=8.210550, smooth=0.828164) | val=1.854478 (main=1.854478, smooth=0.832029) | lr=9.842916e-05 | time=181.49s
+[Epoch 009] train=7.883356 (main=7.883356, smooth=0.827351) | val=2.758898 (main=2.758898, smooth=0.833048) | lr=9.801468e-05 | time=198.65s
+[Epoch 010] train=8.215380 (main=8.215380, smooth=0.827402) | val=1.836617 (main=1.836617, smooth=0.835117) | lr=9.755283e-05 | time=183.62s
+[Epoch 011] train=8.059086 (main=8.059086, smooth=0.826088) | val=1.266439 (main=1.266439, smooth=0.833073) | lr=9.704404e-05 | time=199.99s
+[Epoch 012] train=7.983092 (main=7.983092, smooth=0.826780) | val=1.786059 (main=1.786059, smooth=0.836650) | lr=9.648882e-05 | time=206.42s
+[Epoch 013] train=8.096499 (main=8.096499, smooth=0.827396) | val=1.173148 (main=1.173148, smooth=0.831456) | lr=9.588773e-05 | time=182.50s
+[Epoch 014] train=8.068867 (main=8.068867, smooth=0.827036) | val=2.079904 (main=2.079904, smooth=0.831732) | lr=9.524135e-05 | time=176.13s
+[Epoch 015] train=7.884526 (main=7.884526, smooth=0.827844) | val=1.364127 (main=1.364127, smooth=0.833415) | lr=9.455033e-05 | time=200.24s
+[Epoch 016] train=7.772504 (main=7.772504, smooth=0.826180) | val=2.207400 (main=2.207400, smooth=0.835395) | lr=9.381533e-05 | time=190.59s
+[Epoch 017] train=8.011634 (main=8.011634, smooth=0.825976) | val=1.100751 (main=1.100751, smooth=0.832557) | lr=9.303710e-05 | time=184.09s
+[Epoch 018] train=7.800692 (main=7.800692, smooth=0.824262) | val=2.792992 (main=2.792992, smooth=0.833189) | lr=9.221640e-05 | time=181.72s
+[Epoch 019] train=7.811173 (main=7.811173, smooth=0.824262) | val=2.000258 (main=2.000258, smooth=0.830657) | lr=9.135403e-05 | time=190.73s
+[Epoch 020] train=7.708009 (main=7.708009, smooth=0.823565) | val=2.057968 (main=2.057968, smooth=0.834589) | lr=9.045085e-05 | time=173.06s
+[Epoch 021] train=7.287174 (main=7.287174, smooth=0.823641) | val=2.005565 (main=2.005565, smooth=0.830656) | lr=8.950775e-05 | time=177.46s
+[Epoch 022] train=7.616552 (main=7.616552, smooth=0.822616) | val=2.423647 (main=2.423647, smooth=0.832989) | lr=8.852566e-05 | time=196.21s
+[Epoch 023] train=7.742270 (main=7.742270, smooth=0.822384) | val=2.664706 (main=2.664706, smooth=0.832928) | lr=8.750555e-05 | time=178.41s
+[INFO] Early stopping triggered at epoch 23.
+[INFO] Best epoch=3, best_val_loss=1.000616
+[INFO] Test metrics | MAE=34.931602, RMSE=53.414650, R2=0.083150, MAPE=44.328655, valid_ratio=0.8986
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

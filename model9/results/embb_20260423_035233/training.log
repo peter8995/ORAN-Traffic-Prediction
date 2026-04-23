@@ -1,0 +1,100 @@
+[INFO] Start training with config:
+{
+  "data_root": "/home/cislab301b/peter/ORAN-Traffic-Prediction/Dataset/colosseum-oran-coloran-dataset",
+  "train_dirs": [
+    "tr0"
+  ],
+  "val_dirs": [
+    "tr1"
+  ],
+  "test_dirs": [
+    "tr2"
+  ],
+  "slice_type": "embb",
+  "val_split": 0.2,
+  "sequence_length": 15,
+  "horizon": 1,
+  "chunk_size": 64,
+  "batch_size": 256,
+  "epochs": 1,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0,
+  "scheduler": "none",
+  "patience": 0,
+  "seed": 42,
+  "num_workers": 0,
+  "device": "auto",
+  "loss_type": "mse",
+  "huber_delta": 1.0,
+  "weight_alpha": 4.0,
+  "weight_quantile": 0.9,
+  "weight_upper_quantile": 0.99,
+  "lambda_smooth": 0.0,
+  "lambda_ref_iqr": 104.0,
+  "disable_scale_aware_lambda": false,
+  "rnn_type": "bilstm",
+  "lstm_hidden": 64,
+  "lstm_layers": 2,
+  "lstm_dropout": 0.2,
+  "hidden_dim": 64,
+  "include_target_history": true,
+  "readout": "mean",
+  "bilstm_input_proj_dim": 16,
+  "fft_hidden": 64,
+  "fft_n_heads": 4,
+  "fft_n_layers": 2,
+  "fft_dim_feedforward": 256,
+  "fft_dropout": 0.1,
+  "fft_readout": "mean",
+  "adj_type": "binary_selfloop",
+  "adj_corr_threshold": 0.3,
+  "gat_hidden": 64,
+  "gat_heads": 4,
+  "gat_layers": 2,
+  "gat_dropout": 0.1,
+  "gat_input_proj_dim": 32,
+  "chebyshev_k": 3.0,
+  "anomaly_error_mode": "both",
+  "anomaly_extra_k": [
+    2.0,
+    3.0
+  ],
+  "output_dir": "/home/cislab301b/peter/ORAN-Traffic-Prediction/model9/results/embb_20260423_035233"
+}
+[INFO] Device: cuda
+[INFO] Val trials (explicit): ['tr1']
+[INFO] Slice=embb | train_csv=69 | val_csv=70 | test_csv=69 | num_nodes=16
+[INFO] Loading train CSV files...
+[INFO] Loading val CSV files...
+[INFO] Loading test CSV files...
+[INFO] Use explicit val dirs: train=69 val=70 (--val_split ignored)
+[INFO] Train feature non-zero ratio:
+  - dl_buffer: 0.8854
+  - ul_buffer: 0.0081
+  - tx_brate: 0.8833
+  - rx_brate: 0.3555
+  - ul_sinr: 0.2960
+  - dl_mcs: 0.8831
+  - ul_mcs: 0.2960
+  - phr: 0.3355
+  - tx_pkts: 0.8833
+  - rx_pkts: 0.3794
+  - dl_cqi: 1.0000
+  - rx_errors_ul: 0.2574
+  - dl_n_samples: 0.8833
+  - ul_n_samples: 0.3794
+  - sum_requested_prbs: 0.0018
+  - sum_granted_prbs: 0.8867
+[INFO] Windows | train=137891 val=141812 test=141463
+[INFO] Input feature dimension: 16 (['dl_buffer', 'ul_buffer', 'tx_brate', 'rx_brate', 'ul_sinr', 'dl_mcs', 'ul_mcs', 'phr', 'tx_pkts', 'rx_pkts', 'dl_cqi', 'rx_errors_ul', 'dl_n_samples', 'ul_n_samples', 'sum_requested_prbs', 'sum_granted_prbs'])
+[INFO] Adjacency | type=binary_selfloop, shape=(16, 16), density=1.0000
+[INFO] lambda_smooth | base=0.000000, effective=0.000000, target_iqr=552.000000, multiplier=0.434057, scale_aware=on
+/home/cislab301b/miniforge3/envs/peter/lib/python3.12/site-packages/torch/nn/modules/transformer.py:392: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+[INFO] loss_type=mse (unweighted)
+[Epoch 001] train=85.075358 (main=85.075358, smooth=1.855571) | val=7.807377 (main=7.807377, smooth=0.414646) | lr=1.000000e-04 | time=27.06s
+[INFO] Saved new best checkpoint at epoch 1.
+[INFO] Best epoch=1, best_val_loss=7.807377
+[INFO] Test metrics | MAE=2404.573486, RMSE=3652.797607, R2=-10.253635, MAPE=94.729393, valid_ratio=0.8907
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.

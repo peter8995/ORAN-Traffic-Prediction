@@ -2,7 +2,7 @@
 
 This repository contains models and pipelines for predicting network traffic across different 5G O-RAN slices: **eMBB** (Enhanced Mobile Broadband), **mMTC** (Massive Machine Type Communications), and **uRLLC** (Ultra-Reliable Low-Latency Communications). 
 
-The project leverages sequence-based time-series forecasting, utilizing a combination of **Vision Transformers (ViT)** for feature extraction and **Recurrent Neural Networks (LSTM / BiLSTM)** for temporal sequence modeling.
+The project leverages sequence-based time-series forecasting, utilizing a combination of **Vision Transformers (ViT)** / **Tiny ViT Transformers** for feature extraction, **Recurrent Neural Networks (LSTM / BiLSTM)** for temporal sequence modeling, and (from Model 9 onward) **Graph Attention Networks (GAT)** + **FFT-based frequency-domain Transformers** for multi-domain feature fusion, plus post-training **Chebyshev threshold anomaly detection**.
 
 ## 📂 Project Structure
 
@@ -15,8 +15,9 @@ The project leverages sequence-based time-series forecasting, utilizing a combin
 - **`model6/`**: Anti-overfitting variant of model5 with ViT backbone freezing, dropout regularization, weight decay, early stopping, and pos_weight clamping.
 - **`model7/`**: Custom Tiny ViT variant — replaces the 86M-parameter torchvision vit_b_16 with a lightweight ~0.8-2.4M parameter transformer encoder, better matching model capacity to the 15×11 time-series input scale.
 - **`model7_1/`**: Regression-only ablation of model7 — removes the spike detection head to verify whether multi-task learning actually helps regression. All slices use BiLSTM.
-- **`model8/`**: Regression-first redesign — RobustScaler, chunk-shuffle sampler, smooth-consistency loss, per-CSV val split, optional leave-trial-out val via `--val_dirs`, optional weighted MSE for tail samples. Target switched to `sum_granted_prbs`; features reduced to 13 dims.
+- **`model8/`**: Regression-first redesign — RobustScaler, chunk-shuffle sampler, smooth-consistency loss, per-CSV val split, optional leave-trial-out val via `--val_dirs`, optional weighted MSE for tail samples. Target switched to `sum_granted_prbs`; 15 input features (2026-04-22+).
 - **`model8_1/`**: Transformer ablation of model8 — drops the 3-layer TransformerEncoder, keeps input projection + pos_embedding + LSTM + head. DataProcessor / train.py identical to model8.
+- **`model9/`**: Multi-Domain feature extraction (BiLSTM + GAT + FFT-dual-Transformer, per-node prediction + Chebyshev anomaly flag) from *A Prediction-Based Anomaly Detection Method for Traffic Flow with Multi-Domain Feature Extraction*. Same prediction target as model8 (`sum_granted_prbs`), feature-as-node (N=16 primary / N=15 fairness ablation). Code implemented; pending three-slice experiments. See `model9/DESIGN.md` and `model9/brainstorming.md`.
 - **`model_detect_peak/`**: Spike predictability baselines using Autoencoder and Isolation Forest (unsupervised anomaly detection).
 - **`docs/`**: Per-model deep-dive notes (`model5_6_7_history.md`, `model7_1_ablation.md`, `model8.md`, `model8_1.md`, `model_detect_peak.md`).
 
@@ -125,6 +126,20 @@ Drops the 3-layer TransformerEncoder from Model 8 to measure whether the Transfo
 
 - **Architecture**: `Linear(13→d_model) → pos_embedding → LSTM/BiLSTM → last-step FF head` — preserves input projection and learnable positional embedding so the only ablated variable is the Transformer stack.
 - **Intent**: Clean single-variable ablation against Model 8's round-2 baseline. See `docs/model8_1.md`.
+
+### Model 9: Multi-Domain Prediction + Chebyshev Anomaly (`model9/`)
+Reproduces the pseudo-code architecture from *A Prediction-Based Anomaly Detection Method for Traffic Flow with Multi-Domain Feature Extraction* while keeping Model 8's prediction target (`sum_granted_prbs`, per-slice, horizon=1, T=15). Code implemented 2026-04-23; three-slice experiments pending.
+
+- **Architecture**: Three parallel branches over a **feature-as-node** adaptation (N=16 primary with `sum_granted_prbs` history / N=15 fairness ablation):
+  - **TemporalBranch**: per-node shared BiLSTM (`Linear(1 → 16) → LSTM(hidden=64, layers=2) → last step → Linear → ReLU → Dropout`)
+  - **SpatialBranch**: 2-layer multi-head GAT over binary fully-connected adjacency with self-loop (primary); custom `GATLayer` implementation (no `torch_geometric`); head merge strategy per-layer configurable (`mean` / `concat`)
+  - **FrequencyBranch**: `torch.fft.rfft` → magnitude / phase each through an independent TransformerEncoder (with learnable positional embedding, `norm_first=True`) → mean pool over frequency bins → fuse
+  - **Fusion + Readout**: concat three branches per-node → MLP (`3H → H → horizon`) → mean pool over N → scalar prediction
+- **Anomaly detection**: post-training Chebyshev threshold from validation residuals (`μ ± kσ` signed + `μ + kσ` abs), k=3 default. **Qualitative output only** — no precision/recall eval because the dataset has no reliable anomaly labels (existing spike definitions from model5 / model_detect_peak are known to fail on Colosseum).
+- **Loss**: MSE primary, with Huber / Weighted MSE / Weighted Huber configurable via `--loss_type`. `--lambda_smooth` default `0.0` (smooth-consistency loss off unless explicitly enabled).
+- **Pipeline**: Inherits Model 8's RobustScaler, chunk-shuffle sampler, `--val_dirs` leave-trial-out support, and output artifact structure.
+- **CLI**: Model 8's data / training / LSTM args preserved; Model 8's temporal Transformer args (`--d_model --n_heads --n_layers --dim_feedforward --vit_dropout`) removed; adds `--fft_*`, `--gat_*` (including `--gat_head_merge` / `--gat_final_head_merge`), `--adj_type`, `--readout`, `--include_target_history`, `--chebyshev_k`, `--anomaly_error_mode` etc.
+- See `model9/DESIGN.md` (full design + 21-row Decision Log + complete CLI args) and `model9/brainstorming.md` (design session Q&A log).
 
 ### Spike Predictability Baselines (`model_detect_peak/`)
 Independent unsupervised/anomaly detection baselines to evaluate the inherent predictability of traffic spikes, without the full ViT+LSTM pipeline.
@@ -259,6 +274,31 @@ python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
   --learning_rate 1e-4 --scheduler cosine \
   --rnn_type bilstm --lambda_smooth 0.05
 ```
+
+Model 9 (Multi-Domain BiLSTM + GAT + FFT + Chebyshev anomaly):
+```bash
+cd model9
+python train.py --train_dirs tr0-24 --val_dirs tr25 tr26 --test_dirs tr27 \
+  --slice_type mmtc \
+  --epochs 500 --patience 50 --batch_size 1024 \
+  --learning_rate 1e-4 --scheduler cosine \
+  --rnn_type bilstm --lambda_smooth 0.0 \
+  --include_target_history True --readout mean \
+  --adj_type binary_selfloop \
+  --gat_head_merge mean --gat_final_head_merge mean \
+  --loss_type mse \
+  --chebyshev_k 3.0 --anomaly_error_mode both
+```
+Key new args:
+- `--include_target_history` — include `sum_granted_prbs` history as the 16th feature node (N=16 primary; set `False` for N=15 fairness ablation).
+- `--readout {mean, attention, gated}` — pool strategy over N nodes (default `mean`).
+- `--adj_type {binary_selfloop, binary_noselfloop, correlation}` — GAT adjacency; `--adj_corr_threshold` tunes correlation version.
+- `--fft_readout {mean, cls, last}` — frequency-domain readout over FFT bins.
+- `--gat_head_merge {mean, concat}` / `--gat_final_head_merge {mean, concat}` — per-layer GAT head merge. `concat` requires `gat_hidden % gat_heads == 0` (non-final) or `hidden_dim % gat_heads == 0` (final); enables paper-style `(concat, mean)` combo.
+- `--chebyshev_k` + `--anomaly_error_mode {signed, abs, both}` — anomaly flag threshold and direction.
+- `--loss_type` extended to `{mse, huber, weighted_mse, weighted_huber}`; Huber uses `--huber_delta`.
+
+Removed from Model 8: `--d_model --n_heads --n_layers --dim_feedforward --vit_dropout` (Model 9 has no temporal ViT; FFT Transformer is controlled by `--fft_*` args instead).
 
 Directory range notation: `tr0-4` expands to `tr0, tr1, tr2, tr3, tr4`; multiple tokens allowed, e.g. `tr0-4 tr10`.
 

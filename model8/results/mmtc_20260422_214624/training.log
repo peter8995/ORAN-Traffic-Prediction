@@ -82,3 +82,27 @@
 [Epoch 004] train=8.608275 (main=8.608275, smooth=0.828968) | val=1.041535 (main=1.041535, smooth=0.835530) | lr=9.960574e-06 | time=182.37s
 [INFO] Saved new best checkpoint at epoch 4.
 [Epoch 005] train=8.729229 (main=8.729229, smooth=0.829300) | val=1.134765 (main=1.134765, smooth=0.834917) | lr=9.938442e-06 | time=177.85s
+[Epoch 006] train=7.876879 (main=7.876879, smooth=0.827715) | val=1.104722 (main=1.104722, smooth=0.835751) | lr=9.911436e-06 | time=183.96s
+[Epoch 007] train=7.832903 (main=7.832903, smooth=0.827025) | val=1.272958 (main=1.272958, smooth=0.835185) | lr=9.879584e-06 | time=182.43s
+[Epoch 008] train=7.803265 (main=7.803265, smooth=0.826766) | val=1.264647 (main=1.264647, smooth=0.834541) | lr=9.842916e-06 | time=177.08s
+[Epoch 009] train=7.793146 (main=7.793146, smooth=0.826324) | val=1.142521 (main=1.142521, smooth=0.835483) | lr=9.801468e-06 | time=177.34s
+[Epoch 010] train=7.779039 (main=7.779039, smooth=0.825952) | val=1.337610 (main=1.337610, smooth=0.836250) | lr=9.755283e-06 | time=177.77s
+[Epoch 011] train=7.623038 (main=7.623038, smooth=0.826303) | val=1.251530 (main=1.251530, smooth=0.834779) | lr=9.704404e-06 | time=176.54s
+[Epoch 012] train=7.745403 (main=7.745403, smooth=0.827262) | val=1.258530 (main=1.258530, smooth=0.835984) | lr=9.648882e-06 | time=180.42s
+[Epoch 013] train=7.581427 (main=7.581427, smooth=0.825571) | val=1.279019 (main=1.279019, smooth=0.834772) | lr=9.588773e-06 | time=181.87s
+[Epoch 014] train=7.526787 (main=7.526787, smooth=0.824911) | val=1.420089 (main=1.420089, smooth=0.834803) | lr=9.524135e-06 | time=179.16s
+[Epoch 015] train=7.513945 (main=7.513945, smooth=0.825074) | val=1.253943 (main=1.253943, smooth=0.834770) | lr=9.455033e-06 | time=185.13s
+[Epoch 016] train=7.581992 (main=7.581992, smooth=0.824675) | val=1.278614 (main=1.278614, smooth=0.834751) | lr=9.381533e-06 | time=183.95s
+[Epoch 017] train=7.545491 (main=7.545491, smooth=0.824322) | val=1.444315 (main=1.444315, smooth=0.835051) | lr=9.303710e-06 | time=179.78s
+[Epoch 018] train=7.462023 (main=7.462023, smooth=0.824231) | val=1.884681 (main=1.884681, smooth=0.834241) | lr=9.221640e-06 | time=180.54s
+[Epoch 019] train=7.456537 (main=7.456537, smooth=0.823984) | val=1.675707 (main=1.675707, smooth=0.834909) | lr=9.135403e-06 | time=179.29s
+[Epoch 020] train=7.420116 (main=7.420116, smooth=0.824244) | val=1.513207 (main=1.513207, smooth=0.837663) | lr=9.045085e-06 | time=178.35s
+[Epoch 021] train=7.470840 (main=7.470840, smooth=0.824864) | val=1.537524 (main=1.537524, smooth=0.837433) | lr=8.950775e-06 | time=172.06s
+[Epoch 022] train=7.558196 (main=7.558196, smooth=0.824721) | val=1.693693 (main=1.693693, smooth=0.836474) | lr=8.852566e-06 | time=176.10s
+[Epoch 023] train=7.420091 (main=7.420091, smooth=0.823983) | val=1.611028 (main=1.611028, smooth=0.836572) | lr=8.750555e-06 | time=185.51s
+[Epoch 024] train=7.410816 (main=7.410816, smooth=0.823626) | val=1.583465 (main=1.583465, smooth=0.835453) | lr=8.644843e-06 | time=180.12s
+[INFO] Early stopping triggered at epoch 24.
+[INFO] Best epoch=4, best_val_loss=1.041535
+[INFO] Test metrics | MAE=34.710445, RMSE=53.324806, R2=0.086231, MAPE=43.764023, valid_ratio=0.8986
+[INFO] Prediction subplot groups (experiments): 5
+[INFO] Training finished.
